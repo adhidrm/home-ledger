@@ -1,0 +1,646 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Buku belanja rumah</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--paper:#F7F5F0;--paper-sunk:#EFECE4;--ink:#171714;--ink-muted:#6C6A60;--rule:#D5D0C2;--accent:#A63E1B;--accent-ink:#FFF8F2;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;overflow-x:clip;background:var(--paper)}
+sc-if,sc-for{display:contents}
+.app{width:390px;height:844px;position:relative;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);font-family:var(--font);overflow:hidden}
+.app *{box-sizing:border-box}
+.app button,.app input,.app select{font:inherit;color:inherit;margin:0;border-radius:0}
+.app button{background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.app button:active:not(:disabled){opacity:.6}
+.app button:disabled{color:var(--ink-muted);cursor:default}
+.app :focus{outline:none}
+.app :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.body{position:relative;flex:1}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:clip}
+.top{display:flex;justify-content:space-between;align-items:center;height:48px;padding:0 4px 0 16px;font-size:13px;font-weight:500}
+.top.list{padding:0 16px 0 4px}
+.month{display:flex;align-items:center}
+.month-label{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.arrow{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:15px}
+.app .arrow{text-align:center}
+.app .back{height:44px;padding:0 12px;font-size:13px;font-weight:500}
+.strip{background:var(--paper-sunk);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 16px 16px}
+.strip-head{display:flex;justify-content:space-between;align-items:center;min-height:32px}
+.label{font-size:13px;font-weight:500;color:var(--ink-muted)}
+.figure{font-size:40px;font-weight:600;line-height:48px;margin:2px 0 12px;font-variant-numeric:tabular-nums}
+.capbar{display:flex;align-items:center;gap:12px}
+.track{flex:1;height:4px;background:var(--rule);position:relative;overflow:hidden}
+.fill{position:absolute;inset:0;background:var(--ink);transform-origin:left center}
+.fill.over{background:var(--accent)}
+.caplabel{font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.capstatus{font-size:13px;line-height:18px;margin-top:6px;text-align:right;color:var(--ink-muted)}
+.capstatus.over{color:var(--accent)}
+.section{padding:24px 16px 8px;font-size:13px;font-weight:500;color:var(--ink-muted);border-bottom:1px solid var(--rule)}
+.app .row{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--rule)}
+.row-main{min-width:0;display:flex;flex-direction:column}
+.t16{font-size:16px;font-weight:500;line-height:20px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meta{font-size:13px;font-weight:400;line-height:18px;color:var(--ink-muted)}
+.check{font-size:12px;line-height:16px;color:var(--accent)}
+.amt{font-size:16px;font-weight:500;line-height:20px;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.debt{font-size:13px;font-weight:400;color:var(--ink-muted)}
+.app .textbtn{min-height:44px;padding:0 16px;font-size:13px;font-weight:500;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule)}
+.app .textbtn.flush{padding:0}
+.cat{padding:10px 16px 12px;border-bottom:1px solid var(--rule);min-height:56px}
+.cat-line{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.track2{height:2px;background:var(--rule);margin-top:10px;position:relative;overflow:hidden}
+.fill2{position:absolute;inset:0;background:var(--ink);transform-origin:left center}
+.skel{height:56px;border-bottom:1px solid var(--rule);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bone{display:block;height:12px;background:var(--paper-sunk)}
+.note{padding:18px 16px;font-size:13px;line-height:18px;color:var(--ink-muted);border-bottom:1px solid var(--rule)}
+.note.err{color:var(--ink)}
+.spacer{height:24px}
+.bottom{padding:12px 16px 16px;border-top:1px solid var(--rule);background:var(--paper)}
+.app .primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;background:var(--accent);color:var(--accent-ink);font-size:16px;font-weight:500}
+.app .primary{text-align:center;color:var(--accent-ink)}
+.app .primary:disabled{background:var(--paper-sunk);color:var(--ink-muted);border:1px solid var(--rule)}
+.band{position:sticky;top:0;z-index:1;display:flex;justify-content:space-between;align-items:center;height:52px;padding:0 16px;background:var(--paper-sunk);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.filters{display:flex;border-bottom:1px solid var(--rule)}
+.app .filter{flex:1;min-width:0;height:44px;padding:0 16px;font-size:13px;font-weight:400;color:var(--ink-muted);border-right:1px solid var(--rule);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.app .filter{color:var(--ink-muted);border-right:1px solid var(--rule)}
+.app .filter.on{color:var(--ink);font-weight:600}
+.app .filter.last{border-right:0}
+.search{display:block;width:100%;height:48px;border:0;border-bottom:1px solid var(--rule);background:var(--paper);padding:0 16px;font-size:16px}
+.app .backdrop{position:absolute;inset:0;width:100%;background:var(--ink);opacity:.32}
+.app .backdrop:active{opacity:.32}
+.sheet{position:absolute;left:0;right:0;bottom:0;display:flex;flex-direction:column;background:var(--paper);border-top:1px solid var(--rule);margin:0}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;height:52px;padding-left:16px;border-bottom:1px solid var(--rule)}
+.sheet-title{margin:0;font-size:16px;font-weight:500}
+.field{display:flex;flex-direction:column;gap:2px;padding:10px 16px 8px;border-bottom:1px solid var(--rule)}
+.field:focus-within{background:var(--paper-sunk)}
+.flabel{font-size:12px;font-weight:500;line-height:14px;color:var(--ink-muted)}
+.app .input{display:block;width:100%;height:32px;padding:0;border:0;background:transparent;font-size:16px;-webkit-appearance:none;appearance:none}
+.app .input.big{height:44px;font-size:32px;font-weight:600;font-variant-numeric:tabular-nums}
+.app .input::placeholder{color:var(--ink-muted)}
+.selwrap{display:flex;align-items:center}
+.caret{font-size:13px;color:var(--ink-muted);pointer-events:none}
+.sheet-foot{padding:16px}
+.actbtn{font-size:16px;font-weight:500}
+.app .actbtn.danger{color:var(--accent)}
+.app .actbtn.quiet{color:var(--ink-muted)}
+</style>
+</helmet>
+<div class="app">
+<div class="body">
+
+<sc-if value="{{onDash}}" hint-placeholder-val="{{true}}">
+<div class="scroll">
+  <div class="top">
+    <span>{{household}}</span>
+    <div class="month">
+      <button class="arrow" aria-label="Bulan sebelumnya" onClick="{{prevMonth}}" disabled="{{prevDisabled}}">←</button>
+      <span class="month-label">{{periodLabel}}</span>
+      <button class="arrow" aria-label="Bulan berikutnya" onClick="{{nextMonth}}" disabled="{{nextDisabled}}">→</button>
+    </div>
+  </div>
+
+  <div class="strip">
+    <div class="strip-head">
+      <span class="label">Pengeluaran bulan ini</span>
+      <button class="textbtn flush" onClick="{{toList}}">Lihat daftar</button>
+    </div>
+    <div class="figure">{{spentText}}</div>
+    <div class="capbar" style="display: flex; flex-direction: row; align-items: center; gap: 12px">
+      <div class="track" style="flex: 1 1 auto; min-width: 0"><div class="fill {{fillClass}}" style="transform: scaleX({{capScale}})"></div></div>
+      <span class="caplabel" style="flex: 0 0 auto; font-size: 13px; white-space: nowrap">dari {{capText}}</span>
+    </div>
+    <sc-if value="{{capStatus}}" hint-placeholder-val="{{true}}">
+      <div class="capstatus {{fillClass}}" style="margin-top: 6px; font-size: 13px; line-height: 18px; text-align: right">{{capStatus}}</div>
+    </sc-if>
+  </div>
+
+  <div class="row">
+    <div class="row-main">
+      <span class="t16">Terutang bulan ini</span>
+      <span class="meta">{{owedNote}}</span>
+    </div>
+    <span class="amt">{{owedText}}</span>
+  </div>
+
+  <div class="section">Saldo akun</div>
+  <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+    <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+      <div class="skel"><span class="bone" style="width: 140px"></span><span class="bone" style="width: 88px"></span></div>
+    </sc-for>
+  </sc-if>
+  <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="note err">Saldo gagal dimuat. Periksa koneksi lalu <button class="textbtn flush" onClick="{{retry}}">coba lagi</button>.</div>
+  </sc-if>
+  <sc-if value="{{accEmpty}}" hint-placeholder-val="{{false}}">
+    <div class="note">Belum ada akun. Tambahkan rekening atau dompet pertama.</div>
+  </sc-if>
+  <sc-if value="{{accReady}}" hint-placeholder-val="{{true}}">
+    <sc-for list="{{accounts}}" as="a" hint-placeholder-count="3">
+      <div class="row">
+        <div class="row-main">
+          <span class="t16">{{a.name}}</span>
+          <span class="meta">{{a.type}}</span>
+        </div>
+        <span class="amt">{{a.balanceText}}<sc-if value="{{a.isDebt}}" hint-placeholder-val="{{false}}"><span class="debt" style="margin-left: 4px; font-size: 13px; font-weight: 400; color: var(--ink-muted)">utang</span></sc-if></span>
+      </div>
+    </sc-for>
+    <sc-if value="{{accMore}}" hint-placeholder-val="{{true}}">
+      <button class="textbtn" onClick="{{toggleAccounts}}">{{accToggleLabel}}</button>
+    </sc-if>
+  </sc-if>
+
+  <div class="section">5 kategori terbesar</div>
+  <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+    <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+      <div class="skel"><span class="bone" style="width: 120px"></span><span class="bone" style="width: 96px"></span></div>
+    </sc-for>
+  </sc-if>
+  <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="note err">Kategori gagal dimuat. <button class="textbtn flush" onClick="{{retry}}">Coba lagi</button></div>
+  </sc-if>
+  <sc-if value="{{catEmpty}}" hint-placeholder-val="{{false}}">
+    <div class="note">Belum ada pengeluaran di {{periodLabel}}.</div>
+  </sc-if>
+  <sc-if value="{{catReady}}" hint-placeholder-val="{{true}}">
+    <sc-for list="{{topCats}}" as="c" hint-placeholder-count="5">
+      <div class="cat">
+        <div class="cat-line"><span class="t16">{{c.name}}</span><span class="amt">{{c.amountText}}</span></div>
+        <div class="track2"><div class="fill2" style="transform: scaleX({{c.scale}})"></div></div>
+      </div>
+    </sc-for>
+  </sc-if>
+  <div class="spacer"></div>
+</div>
+</sc-if>
+
+<sc-if value="{{onList}}" hint-placeholder-val="{{false}}">
+<div class="scroll">
+  <div class="top list">
+    <button class="back" onClick="{{toDash}}">← Ringkasan</button>
+    <span>{{household}}</span>
+  </div>
+  <div class="band">
+    <span class="month-label">{{periodLabel}}</span>
+    <span class="amt">{{listTotalText}}</span>
+  </div>
+  <div class="filters">
+    <button class="filter {{accFilterClass}}" onClick="{{cycleAcc}}" aria-label="Filter akun: {{accFilterLabel}}">{{accFilterLabel}}</button>
+    <button class="filter {{catFilterClass}}" onClick="{{cycleCat}}" aria-label="Filter kategori: {{catFilterLabel}}">{{catFilterLabel}}</button>
+    <button class="filter last {{searchClass}}" onClick="{{toggleSearch}}" aria-expanded="{{searchOpenStr}}">{{searchLabel}}</button>
+  </div>
+  <sc-if value="{{searchOpen}}" hint-placeholder-val="{{false}}">
+    <input class="search" type="search" placeholder="Cari merchant" aria-label="Cari merchant" value="{{q}}" onChange="{{onQ}}" ref="{{searchRef}}">
+  </sc-if>
+
+  <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+    <sc-for list="{{skelRowsLong}}" as="s" hint-placeholder-count="6">
+      <div class="skel"><span class="bone" style="width: 150px"></span><span class="bone" style="width: 80px"></span></div>
+    </sc-for>
+  </sc-if>
+  <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+    <div class="note err">Daftar pengeluaran gagal dimuat. <button class="textbtn flush" onClick="{{retry}}">Coba lagi</button></div>
+  </sc-if>
+  <sc-if value="{{listEmpty}}" hint-placeholder-val="{{false}}">
+    <div class="note">{{listEmptyText}}</div>
+  </sc-if>
+  <sc-if value="{{listReady}}" hint-placeholder-val="{{true}}">
+    <sc-for list="{{rows}}" as="r" hint-placeholder-count="8">
+      <button class="row" onClick="{{r.open}}">
+        <span class="row-main">
+          <span class="t16">{{r.merchant}}</span>
+          <span class="meta">{{r.meta}}</span>
+          <sc-if value="{{r.needsCheck}}" hint-placeholder-val="{{false}}"><span class="check">perlu dicek</span></sc-if>
+        </span>
+        <span class="amt">{{r.amountText}}</span>
+      </button>
+    </sc-for>
+  </sc-if>
+  <div class="spacer"></div>
+</div>
+</sc-if>
+
+</div>
+<div class="bottom">
+  <button class="primary" onClick="{{newExpense}}">+ Catat</button>
+</div>
+
+<sc-if value="{{hasAction}}" hint-placeholder-val="{{false}}">
+  <button class="backdrop" aria-label="Tutup pilihan" onClick="{{closeAction}}"></button>
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Pilihan pengeluaran" onKeyDown="{{actionKeys}}" ref="{{actionSheetRef}}">
+    <div class="row">
+      <div class="row-main">
+        <span class="t16">{{action.merchant}}</span>
+        <span class="meta">{{action.meta}}</span>
+      </div>
+      <span class="amt">{{action.amountText}}</span>
+    </div>
+    <button class="row actbtn" onClick="{{editAction}}">Ubah</button>
+    <button class="row actbtn danger" onClick="{{deleteAction}}">Hapus</button>
+    <button class="row actbtn quiet" onClick="{{closeAction}}">Batal</button>
+  </div>
+</sc-if>
+
+<sc-if value="{{onForm}}" hint-placeholder-val="{{false}}">
+  <button class="backdrop" aria-label="Tutup formulir" onClick="{{closeForm}}"></button>
+  <form class="sheet" role="dialog" aria-modal="true" onSubmit="{{save}}" aria-label="{{formTitle}}" onKeyDown="{{formKeys}}">
+    <div class="sheet-head">
+      <h2 class="sheet-title">{{formTitle}}</h2>
+      <button type="button" class="textbtn" onClick="{{closeForm}}">Batal</button>
+    </div>
+    <label class="field">
+      <span class="flabel">Jumlah</span>
+      <input class="input big" type="text" inputmode="numeric" autocomplete="off" placeholder="Rp0" value="{{form.amountText}}" onChange="{{onAmount}}" ref="{{amountRef}}">
+    </label>
+    <label class="field">
+      <span class="flabel">Tanggal</span>
+      <input class="input" type="date" value="{{form.date}}" onChange="{{onDate}}">
+    </label>
+    <label class="field">
+      <span class="flabel">Akun</span>
+      <span class="selwrap">
+        <select class="input" value="{{form.accountId}}" onChange="{{onAccount}}">
+          <sc-for list="{{accountOptions}}" as="o" hint-placeholder-count="5"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+        </select>
+        <span class="caret" aria-hidden="true">▾</span>
+      </span>
+    </label>
+    <label class="field">
+      <span class="flabel">Kategori</span>
+      <span class="selwrap">
+        <select class="input" value="{{form.categoryId}}" onChange="{{onCategory}}">
+          <sc-for list="{{categoryOptions}}" as="o" hint-placeholder-count="9"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+        </select>
+        <span class="caret" aria-hidden="true">▾</span>
+      </span>
+    </label>
+    <label class="field">
+      <span class="flabel">Merchant</span>
+      <input class="input" type="text" autocomplete="off" placeholder="Misalnya Indomaret" value="{{form.merchant}}" onChange="{{onMerchant}}">
+    </label>
+    <label class="field">
+      <span class="flabel">Catatan</span>
+      <input class="input" type="text" autocomplete="off" placeholder="Opsional" value="{{form.note}}" onChange="{{onNote}}">
+    </label>
+    <div class="sheet-foot">
+      <button type="submit" class="primary" disabled="{{saveDisabled}}">Simpan</button>
+    </div>
+  </form>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;dashboard&quot;,&quot;list&quot;,&quot;form&quot;],&quot;default&quot;:&quot;dashboard&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;data&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;data&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;batas&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;min&quot;:1000000,&quot;max&quot;:20000000,&quot;step&quot;:500000,&quot;default&quot;:6000000,&quot;section&quot;:&quot;Data&quot;},&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}">
+const MOCK = {
+  household: "Rumah Adhi",
+  period: "November 2026",
+  cap: 6000000,
+  spent: 4285000,
+  owed: 1245000,
+  owedCount: 2,
+  accounts: [
+    { id: "bca", name: "BCA", type: "Tabungan", balance: 8450000, isDebt: false },
+    { id: "bni", name: "Kartu Kredit BNI", type: "Kartu kredit", balance: 1870000, isDebt: true },
+    { id: "mandiri", name: "Mandiri", type: "Tabungan", balance: 2130500, isDebt: false },
+    { id: "gopay", name: "GoPay", type: "Dompet digital", balance: 312000, isDebt: false },
+    { id: "tunai", name: "Tunai", type: "Uang tunai", balance: 450000, isDebt: false }
+  ],
+  categories: [
+    { id: "belanja", name: "Belanja harian" },
+    { id: "makan", name: "Makan" },
+    { id: "transport", name: "Transportasi" },
+    { id: "listrik", name: "Listrik & air" },
+    { id: "pulsa", name: "Pulsa & internet" },
+    { id: "rumah", name: "Rumah tangga" },
+    { id: "sehat", name: "Kesehatan" },
+    { id: "sekolah", name: "Pendidikan" },
+    { id: "lain", name: "Lainnya" }
+  ],
+  expenses: [
+    { id: "e1", date: "2026-11-11", merchant: "Indomaret", accountId: "gopay", categoryId: "belanja", amount: 87500, needsCheck: false },
+    { id: "e2", date: "2026-11-11", merchant: "Grab", accountId: "gopay", categoryId: "transport", amount: 32000, needsCheck: false },
+    { id: "e3", date: "2026-11-10", merchant: "Warteg Bahari", accountId: "tunai", categoryId: "makan", amount: 18000, needsCheck: false },
+    { id: "e4", date: "2026-11-10", merchant: "Token listrik PLN", accountId: "bca", categoryId: "listrik", amount: 200000, needsCheck: false },
+    { id: "e5", date: "2026-11-09", merchant: "GoPay top up", accountId: "bca", categoryId: "lain", amount: 100000, needsCheck: true },
+    { id: "e6", date: "2026-11-09", merchant: "Superindo", accountId: "bni", categoryId: "belanja", amount: 412300, needsCheck: false },
+    { id: "e7", date: "2026-11-08", merchant: "Shell", accountId: "bni", categoryId: "transport", amount: 150000, needsCheck: false },
+    { id: "e8", date: "2026-11-08", merchant: "Kopi Kenangan", accountId: "gopay", categoryId: "makan", amount: 24000, needsCheck: false },
+    { id: "e9", date: "2026-11-07", merchant: "Pulsa Telkomsel", accountId: "bca", categoryId: "pulsa", amount: 100000, needsCheck: false },
+    { id: "e10", date: "2026-11-07", merchant: "Apotek K-24", accountId: "mandiri", categoryId: "sehat", amount: 86500, needsCheck: false },
+    { id: "e11", date: "2026-11-06", merchant: "Alfamart", accountId: "tunai", categoryId: "belanja", amount: 56200, needsCheck: false },
+    { id: "e12", date: "2026-11-06", merchant: "Gojek", accountId: "gopay", categoryId: "transport", amount: 27000, needsCheck: false },
+    { id: "e13", date: "2026-11-05", merchant: "Sate Khas Senayan", accountId: "bni", categoryId: "makan", amount: 245000, needsCheck: false },
+    { id: "e14", date: "2026-11-05", merchant: "PDAM", accountId: "mandiri", categoryId: "listrik", amount: 120000, needsCheck: false },
+    { id: "e15", date: "2026-11-04", merchant: "BPJS Kesehatan", accountId: "bca", categoryId: "sehat", amount: 150000, needsCheck: false },
+    { id: "e16", date: "2026-11-04", merchant: "Tokopedia", accountId: "bni", categoryId: "rumah", amount: 389000, needsCheck: true },
+    { id: "e17", date: "2026-11-03", merchant: "Hypermart", accountId: "bca", categoryId: "belanja", amount: 534700, needsCheck: false },
+    { id: "e18", date: "2026-11-03", merchant: "Warteg Bahari", accountId: "tunai", categoryId: "makan", amount: 22000, needsCheck: false },
+    { id: "e19", date: "2026-11-02", merchant: "Pertamina", accountId: "bca", categoryId: "transport", amount: 200000, needsCheck: false },
+    { id: "e20", date: "2026-11-02", merchant: "Laundry kiloan", accountId: "tunai", categoryId: "rumah", amount: 45000, needsCheck: false },
+    { id: "e21", date: "2026-11-02", merchant: "Indomaret", accountId: "gopay", categoryId: "belanja", amount: 63800, needsCheck: false },
+    { id: "e22", date: "2026-11-01", merchant: "Iuran RT", accountId: "tunai", categoryId: "lain", amount: 50000, needsCheck: false },
+    { id: "e23", date: "2026-11-01", merchant: "Pasar Minggu", accountId: "tunai", categoryId: "belanja", amount: 178000, needsCheck: false },
+    { id: "e24", date: "2026-11-01", merchant: "Shopee", accountId: "bni", categoryId: "rumah", amount: 249000, needsCheck: false },
+    { id: "e25", date: "2026-11-01", merchant: "SPP sekolah", accountId: "mandiri", categoryId: "sekolah", amount: 745000, needsCheck: false }
+  ],
+  bills: [
+    { id: "b1", name: "Cicilan Kartu Kredit BNI", dueDay: 15, expected: 870000, accountId: "bca", paid: false },
+    { id: "b2", name: "IndiHome", dueDay: 20, expected: 375000, accountId: "bca", paid: false },
+    { id: "b3", name: "BPJS Kesehatan", dueDay: 10, expected: 150000, accountId: "bca", paid: true },
+    { id: "b4", name: "PDAM", dueDay: 20, expected: 120000, accountId: "mandiri", paid: true }
+  ]
+};
+
+const TODAY = "2026-11-11";
+const CURRENT_YM = "2026-11";
+const MIN_YM = "2026-01";
+const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+const MON = ["Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Agu", "Sep", "Okt", "Nov", "Des"];
+
+function rp(n) {
+  const s = String(Math.round(Math.abs(n || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  return "Rp" + s;
+}
+function shiftYm(ym, d) {
+  let y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)) + d;
+  if (m < 1) { m = 12; y -= 1; }
+  if (m > 12) { m = 1; y += 1; }
+  return y + "-" + String(m).padStart(2, "0");
+}
+function ymLabel(ym) { return MONTHS[Number(ym.slice(5, 7)) - 1] + " " + ym.slice(0, 4); }
+function dayLabel(date) { return Number(date.slice(8, 10)) + " " + MON[Number(date.slice(5, 7)) - 1]; }
+function accName(id) { const a = MOCK.accounts.find((x) => x.id === id); return a ? a.name : "Akun"; }
+function catName(id) { const c = MOCK.categories.find((x) => x.id === id); return c ? c.name : "Lainnya"; }
+function blankForm() {
+  return { id: null, amount: 0, amountText: "", date: TODAY, accountId: "bca", categoryId: "belanja", merchant: "", note: "" };
+}
+const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
+// Escape closes the sheet; Tab wraps inside it so focus never lands behind the backdrop.
+function sheetKeys(e, onClose) {
+  if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+  if (e.key !== "Tab") return;
+  const items = Array.prototype.slice.call(e.currentTarget.querySelectorAll(FOCUSABLE));
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1], cur = document.activeElement;
+  if (e.shiftKey && (cur === first || !e.currentTarget.contains(cur))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+}
+// After a sheet closes, focus goes back to whatever opened it, or to the fallback when that control is gone.
+function restoreFocus(el, fallbackSelector) {
+  setTimeout(() => {
+    const target = el && el.isConnected ? el : document.querySelector(fallbackSelector);
+    if (target) { try { target.focus({ preventScroll: true }); } catch (e) {} }
+  }, 0);
+}
+
+class Component extends DCLogic {
+  state = {
+    screen: (this.props && this.props.startScreen) || "dashboard",
+    prev: "dashboard",
+    ym: CURRENT_YM,
+    expenses: MOCK.expenses.slice(),
+    showAllAcc: false,
+    fAcc: "",
+    fCat: "",
+    q: "",
+    searchOpen: false,
+    actionId: null,
+    form: blankForm(),
+    ds: null
+  };
+
+  amountRef = (el) => {
+    if (el && el !== this._amt) {
+      this._amt = el;
+      try { el.focus({ preventScroll: true }); } catch (e) {}
+    }
+    if (!el) this._amt = null;
+  };
+
+  searchRef = (el) => {
+    if (el && el !== this._search) {
+      this._search = el;
+      try { el.focus({ preventScroll: true }); } catch (e) {}
+    }
+    if (!el) this._search = null;
+  };
+
+  actionSheetRef = (el) => {
+    if (el && el !== this._actionSheet) {
+      this._actionSheet = el;
+      const first = el.querySelector("button");
+      if (first) { try { first.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    if (!el) this._actionSheet = null;
+  };
+
+  closeActionSheet() {
+    this.setState({ actionId: null });
+    restoreFocus(this._returnEl, ".app .primary");
+  }
+
+  closeFormSheet() {
+    this.setState({ screen: this.state.prev, form: blankForm() });
+    restoreFocus(this._returnEl, ".app .primary");
+  }
+
+  componentDidUpdate(pp) {
+    if (pp.startScreen !== this.props.startScreen) {
+      this.setState({ screen: this.props.startScreen || "dashboard", prev: "dashboard", form: blankForm(), actionId: null });
+    }
+    if (pp.dataState !== this.props.dataState && this.state.ds) this.setState({ ds: null });
+  }
+
+  openForm(exp) {
+    const s = this.state;
+    const prev = s.screen === "form" ? s.prev : s.screen;
+    if (!s.actionId) this._returnEl = document.activeElement;
+    const form = exp
+      ? { id: exp.id, amount: exp.amount, amountText: rp(exp.amount), date: exp.date, accountId: exp.accountId, categoryId: exp.categoryId, merchant: exp.merchant, note: exp.note || "" }
+      : blankForm();
+    this.setState({ screen: "form", prev, form, actionId: null });
+  }
+
+  setField(key) {
+    return (e) => {
+      const v = e.target.value;
+      this.setState((s) => ({ form: Object.assign({}, s.form, { [key]: v }) }));
+    };
+  }
+
+  renderVals() {
+    const s = this.state;
+    const p = this.props;
+    const eff = s.ds || p.dataState || "data";
+    const cap = p.batas || MOCK.cap;
+    const base = s.screen === "form" ? s.prev : s.screen;
+
+    const isLoading = eff === "loading";
+    const isError = eff === "error";
+    const forceEmpty = eff === "empty";
+    const live = eff === "data";
+
+    const monthExp = forceEmpty ? [] : s.expenses
+      .map((e, i) => ({ e, i }))
+      .filter((x) => x.e.date.slice(0, 7) === s.ym)
+      .sort((a, b) => (a.e.date < b.e.date ? 1 : a.e.date > b.e.date ? -1 : a.i - b.i))
+      .map((x) => x.e);
+
+    const spent = monthExp.reduce((t, e) => t + e.amount, 0);
+    const pct = cap > 0 ? spent / cap : 0;
+    const over = pct >= 1;
+    const near = pct >= 0.7 && pct < 1;
+    const blank = isLoading || isError;
+
+    const isCurrent = s.ym === CURRENT_YM;
+    const unpaid = isCurrent && !forceEmpty ? MOCK.bills.filter((b) => !b.paid) : [];
+    const owed = unpaid.reduce((t, b) => t + b.expected, 0);
+
+    const accAll = forceEmpty ? [] : MOCK.accounts;
+    const accVisible = s.showAllAcc ? accAll : accAll.slice(0, 3);
+
+    const byCat = {};
+    monthExp.forEach((e) => { byCat[e.categoryId] = (byCat[e.categoryId] || 0) + e.amount; });
+    const cats = Object.keys(byCat).map((id) => ({ id, amount: byCat[id] })).sort((a, b) => b.amount - a.amount).slice(0, 5);
+    const maxCat = cats.length ? cats[0].amount : 1;
+
+    const q = s.q.trim().toLowerCase();
+    const filtered = monthExp.filter((e) =>
+      (!s.fAcc || e.accountId === s.fAcc) &&
+      (!s.fCat || e.categoryId === s.fCat) &&
+      (!q || e.merchant.toLowerCase().indexOf(q) !== -1)
+    );
+    const filtering = !!(s.fAcc || s.fCat || q);
+
+    const accIds = [""].concat(MOCK.accounts.map((a) => a.id));
+    const catIds = [""].concat(MOCK.categories.map((c) => c.id));
+    const actionExp = s.actionId ? s.expenses.find((e) => e.id === s.actionId) : null;
+
+    return {
+      household: MOCK.household,
+      periodLabel: ymLabel(s.ym),
+      onDash: base === "dashboard",
+      onList: base === "list",
+      onForm: s.screen === "form",
+
+      prevDisabled: s.ym <= MIN_YM,
+      nextDisabled: s.ym >= CURRENT_YM,
+      prevMonth: () => this.setState({ ym: shiftYm(s.ym, -1) }),
+      nextMonth: () => this.setState({ ym: shiftYm(s.ym, 1) }),
+      toList: () => this.setState({ screen: "list" }),
+      toDash: () => this.setState({ screen: "dashboard" }),
+
+      spentText: blank ? "—" : rp(spent),
+      capText: rp(cap),
+      capScale: blank ? 0 : Math.min(pct, 1).toFixed(4),
+      fillClass: over && !blank ? "over" : "",
+      capStatus: blank ? "" : over ? "lewat batas" : near ? "mendekati batas" : "",
+
+      owedText: blank ? "—" : rp(owed),
+      owedNote: blank ? "Memuat tagihan" : unpaid.length ? unpaid.length + " tagihan belum lunas" : "Tidak ada tagihan belum lunas",
+
+      isLoading,
+      isError,
+      skelRows: [0, 1, 2],
+      skelRowsLong: [0, 1, 2, 3, 4, 5],
+      retry: () => this.setState({ ds: "data" }),
+
+      accEmpty: !blank && accAll.length === 0,
+      accReady: !blank && accAll.length > 0,
+      accounts: accVisible.map((a) => ({ name: a.name, type: a.type, balanceText: rp(a.balance), isDebt: a.isDebt })),
+      accMore: accAll.length > 3,
+      accToggleLabel: s.showAllAcc ? "Tampilkan 3 saja" : "Lihat semua",
+      toggleAccounts: () => this.setState({ showAllAcc: !s.showAllAcc }),
+
+      catEmpty: !blank && cats.length === 0,
+      catReady: !blank && cats.length > 0,
+      topCats: cats.map((c) => ({ name: catName(c.id), amountText: rp(c.amount), scale: (c.amount / maxCat).toFixed(4) })),
+
+      listTotalText: blank ? "—" : rp(filtered.reduce((t, e) => t + e.amount, 0)),
+      accFilterLabel: s.fAcc ? accName(s.fAcc) : "Semua akun",
+      accFilterClass: s.fAcc ? "on" : "",
+      catFilterLabel: s.fCat ? catName(s.fCat) : "Semua kategori",
+      catFilterClass: s.fCat ? "on" : "",
+      searchLabel: q ? "“" + s.q.trim() + "”" : "Cari",
+      searchClass: q || s.searchOpen ? "on" : "",
+      searchOpen: s.searchOpen,
+      searchOpenStr: s.searchOpen ? "true" : "false",
+      q: s.q,
+      onQ: (e) => this.setState({ q: e.target.value }),
+      cycleAcc: () => this.setState({ fAcc: accIds[(accIds.indexOf(s.fAcc) + 1) % accIds.length] }),
+      cycleCat: () => this.setState({ fCat: catIds[(catIds.indexOf(s.fCat) + 1) % catIds.length] }),
+      toggleSearch: () => this.setState({ searchOpen: !s.searchOpen, q: s.searchOpen ? "" : s.q }),
+
+      listEmpty: !blank && filtered.length === 0,
+      listEmptyText: filtering ? "Tidak ada pengeluaran yang cocok dengan filter ini." : "Belum ada pengeluaran di " + ymLabel(s.ym) + ".",
+      listReady: !blank && filtered.length > 0,
+      rows: filtered.map((e) => ({
+        merchant: e.merchant,
+        meta: accName(e.accountId) + " · " + dayLabel(e.date),
+        amountText: rp(e.amount),
+        needsCheck: !!e.needsCheck,
+        open: () => { this._returnEl = document.activeElement; this.setState({ actionId: e.id }); }
+      })),
+
+      hasAction: !!actionExp && s.screen !== "form",
+      action: actionExp
+        ? { merchant: actionExp.merchant, meta: accName(actionExp.accountId) + " · " + dayLabel(actionExp.date), amountText: rp(actionExp.amount) }
+        : { merchant: "", meta: "", amountText: "" },
+      closeAction: () => this.closeActionSheet(),
+      actionKeys: (e) => sheetKeys(e, () => this.closeActionSheet()),
+      actionSheetRef: this.actionSheetRef,
+      editAction: () => actionExp && this.openForm(actionExp),
+      deleteAction: () => {
+        this.setState({ expenses: s.expenses.filter((e) => e.id !== s.actionId), actionId: null });
+        restoreFocus(null, ".app .primary");
+      },
+
+      newExpense: () => this.openForm(null),
+      closeForm: () => this.closeFormSheet(),
+      formKeys: (e) => sheetKeys(e, () => this.closeFormSheet()),
+      form: s.form,
+      formTitle: s.form.id ? "Ubah pengeluaran" : "Catat pengeluaran",
+      amountRef: this.amountRef,
+      searchRef: this.searchRef,
+      onAmount: (e) => {
+        const digits = e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 12);
+        const amount = Number(digits) || 0;
+        this.setState((st) => ({ form: Object.assign({}, st.form, { amount, amountText: digits ? rp(amount) : "" }) }));
+      },
+      onDate: this.setField("date"),
+      onAccount: this.setField("accountId"),
+      onCategory: this.setField("categoryId"),
+      onMerchant: this.setField("merchant"),
+      onNote: this.setField("note"),
+      accountOptions: MOCK.accounts.map((a) => ({ id: a.id, name: a.name })),
+      categoryOptions: MOCK.categories.map((c) => ({ id: c.id, name: c.name })),
+      saveDisabled: !(s.form.amount > 0),
+      save: (e) => {
+        if (e && e.preventDefault) e.preventDefault();
+        const f = this.state.form;
+        if (!(f.amount > 0)) return;
+        const rec = {
+          id: f.id || "e" + Date.now(),
+          date: f.date || TODAY,
+          merchant: f.merchant.trim() || catName(f.categoryId),
+          accountId: f.accountId,
+          categoryId: f.categoryId,
+          amount: f.amount,
+          needsCheck: false,
+          note: f.note.trim()
+        };
+        const expenses = f.id
+          ? this.state.expenses.map((x) => (x.id === f.id ? rec : x))
+          : [rec].concat(this.state.expenses);
+        this.setState({ expenses, screen: this.state.prev, form: blankForm() });
+        restoreFocus(this._returnEl, ".app .primary");
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,771 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Review struk dan pengaturan</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>
+:root{--paper:#F7F5F0;--paper-sunk:#EFECE4;--ink:#171714;--ink-muted:#6C6A60;--rule:#D5D0C2;--accent:#A63E1B;--accent-ink:#FFF8F2;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+html,body{margin:0;overflow-x:clip;background:var(--paper)}
+sc-if,sc-for{display:contents}
+.app{width:390px;height:844px;position:relative;display:flex;flex-direction:column;background:var(--paper);color:var(--ink);font-family:var(--font);overflow:hidden}
+.app *{box-sizing:border-box}
+.app button,.app input,.app select{font:inherit;color:inherit;margin:0;border-radius:0}
+.app button{background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.app button:active:not(:disabled),.app a:active{opacity:.6}
+.app button:disabled{color:var(--ink-muted);cursor:default}
+.app :focus{outline:none}
+.app :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.col{max-width:520px;margin:0 auto}
+.tabs{display:flex;border-bottom:1px solid var(--rule)}
+.app .tab{flex:1;height:48px;padding:0 16px;font-size:13px;font-weight:400;color:var(--ink-muted);border-right:1px solid var(--rule)}
+.app .tab.last{border-right:0}
+.app .tab.on{color:var(--ink);font-weight:600}
+.body{position:relative;flex:1}
+.scroll{position:absolute;inset:0;overflow-y:auto;overflow-x:clip}
+.photo{margin:16px 16px 0;aspect-ratio:4/3;background:var(--paper-sunk);border:1px solid var(--rule);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--ink-muted)}
+.form{margin-top:16px;border-top:1px solid var(--rule)}
+.form.warn{border-top:1px solid var(--accent)}
+.field{display:flex;flex-direction:column;gap:2px;padding:10px 16px 8px;border-bottom:1px solid var(--rule)}
+.field:focus-within{background:var(--paper-sunk)}
+.flabel{font-size:12px;font-weight:500;line-height:14px;color:var(--ink-muted)}
+.app .input{display:block;width:100%;height:32px;padding:0;border:0;background:transparent;font-size:16px;-webkit-appearance:none;appearance:none}
+.app .input.big{height:40px;font-size:32px;font-weight:600;font-variant-numeric:tabular-nums}
+.app .input::placeholder{color:var(--ink-muted)}
+.warnline{font-size:13px;line-height:18px;color:var(--accent);padding-bottom:2px}
+.selwrap{display:flex;align-items:center}
+.caret{font-size:13px;color:var(--ink-muted);pointer-events:none}
+.app .disclosure{display:flex;justify-content:space-between;align-items:center;width:100%;min-height:56px;padding:0 16px;border-bottom:1px solid var(--rule);font-size:16px;font-weight:500}
+.disc-hint{font-size:13px;font-weight:400;color:var(--ink-muted)}
+.item{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;padding:8px 16px;border-bottom:1px solid var(--rule)}
+.item-name{font-size:16px;font-weight:400;line-height:20px;min-width:0}
+.item-qty{font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+.item-sum{display:flex;justify-content:space-between;padding:10px 16px;border-bottom:1px solid var(--rule);font-size:13px;color:var(--ink-muted);font-variant-numeric:tabular-nums}
+.skel{height:56px;border-bottom:1px solid var(--rule);padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.bone{display:block;height:12px;background:var(--paper-sunk)}
+.note{padding:18px 16px;font-size:13px;line-height:18px;color:var(--ink-muted);border-bottom:1px solid var(--rule)}
+.note.err{color:var(--ink)}
+.spacer{height:24px}
+.bottom{padding:12px 16px 4px;border-top:1px solid var(--rule);background:var(--paper)}
+.app .primary{display:flex;align-items:center;justify-content:center;width:100%;height:52px;background:var(--accent);color:var(--accent-ink);font-size:16px;font-weight:500;text-align:center}
+.app .primary:disabled{background:var(--paper-sunk);color:var(--ink-muted);border:1px solid var(--rule)}
+.plain{display:flex;align-items:center;justify-content:center;height:44px;font-size:16px;font-weight:500;color:var(--ink);text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule)}
+.section{padding:24px 16px 8px;font-size:13px;font-weight:500;color:var(--ink-muted);border-bottom:1px solid var(--rule)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--rule)}
+.row-main{min-width:0;display:flex;flex-direction:column}
+.t16{font-size:16px;font-weight:500;line-height:20px}
+.meta{font-size:13px;line-height:18px;color:var(--ink-muted);overflow-wrap:anywhere}
+.side{display:flex;flex-direction:column;align-items:flex-end;gap:2px;flex:0 0 auto}
+.t12{font-size:12px;line-height:16px}
+.muted{color:var(--ink-muted)}
+.mono-num{font-variant-numeric:tabular-nums}
+.app .textbtn{min-height:44px;font-size:12px;font-weight:500;text-decoration:underline;text-underline-offset:3px;text-decoration-color:var(--rule);text-align:right}
+.app .textbtn.t13{font-size:13px;min-height:44px}
+.app .textbtn.danger{color:var(--accent)}
+.actions{padding:12px 16px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:12px}
+.app .ghost{height:44px;padding:0 16px;border:1px solid var(--ink);font-size:16px;font-weight:500;text-align:center;align-self:flex-start}
+.app .ghost:disabled{border-color:var(--rule)}
+.helper{font-size:12px;line-height:16px;color:var(--ink-muted)}
+.json{margin:0;padding:12px;border:1px solid var(--rule);font-family:inherit;font-size:13px;line-height:18px;font-variant-numeric:tabular-nums;white-space:pre-wrap;overflow-wrap:anywhere}
+.errline{font-size:13px;line-height:18px;color:var(--accent)}
+.loadrow{height:56px;display:flex;align-items:center;font-size:13px;color:var(--ink-muted);border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.block{padding:16px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:8px}
+.month{display:flex;align-items:center}
+.app .arrow{width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:15px;text-align:center}
+.month-label{font-size:15px;font-weight:500;font-variant-numeric:tabular-nums}
+.file{padding:8px 16px;border-bottom:1px solid var(--rule);font-size:12px;line-height:16px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.code{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
+.app .addrow{display:flex;align-items:center;width:100%;height:56px;padding:0 16px;border-bottom:1px solid var(--rule);font-size:16px;font-weight:500;color:var(--accent)}
+.app .backdrop{position:absolute;inset:0;width:100%;background:var(--ink);opacity:.32}
+.app .backdrop:active{opacity:.32}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:calc(100% - 24px);display:flex;flex-direction:column;background:var(--paper);border-top:1px solid var(--rule)}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;flex:0 0 52px;padding-left:16px;border-bottom:1px solid var(--rule)}
+.sheet-title{margin:0;font-size:16px;font-weight:500}
+.app .textbtn.pad{padding:0 16px}
+.sheet-body{flex:1 1 auto;overflow-y:auto;overflow-x:clip}
+.presets{display:flex;flex-wrap:wrap;align-items:center;column-gap:2px}
+.app .preset{min-height:44px;font-size:16px;font-weight:400;color:var(--ink-muted)}
+.app .preset.on{color:var(--ink);font-weight:600}
+.sep{color:var(--ink-muted);padding:0 4px}
+.fhelp{font-size:12px;line-height:16px;color:var(--ink-muted);overflow-wrap:anywhere;padding-bottom:2px}
+.toggle-row{flex-direction:row;justify-content:space-between;align-items:center;min-height:56px}
+.app .switch{display:flex;align-items:center;gap:8px;min-height:44px;font-size:13px;font-weight:500}
+.track-s{position:relative;width:32px;height:16px;border:1px solid var(--ink-muted)}
+.knob{position:absolute;top:1px;left:1px;width:12px;height:12px;background:var(--ink-muted);transition:transform 100ms}
+.switch.on .track-s{border-color:var(--ink)}
+.switch.on .knob{background:var(--ink);transform:translateX(16px)}
+.keyrow{display:flex;align-items:center;gap:12px}
+.result{padding:12px 16px 16px;display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--rule)}
+.testskel{padding:16px;display:flex;flex-direction:column;gap:10px;border-bottom:1px solid var(--rule)}
+.sheet-foot{flex:0 0 auto;padding:12px 16px 16px;border-top:1px solid var(--rule);display:flex;flex-direction:column;gap:12px;background:var(--paper)}
+.foot-btns{display:flex;gap:12px}
+.app .hair{flex:0 0 auto;height:52px;padding:0 16px;border:1px solid var(--ink);font-size:16px;font-weight:500;text-align:center}
+.app .hair:disabled{border-color:var(--rule)}
+.foot-btns .primary{flex:1 1 auto}
+.sr-only{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+</style>
+</helmet>
+<div class="app">
+  <span class="sr-only" role="status" aria-live="polite">{{liveText}}</span>
+  <div class="tabs">
+    <button class="tab {{tabReceiptClass}}" onClick="{{toReceipt}}" aria-pressed="{{receiptPressed}}">Review struk</button>
+    <button class="tab last {{tabSettingsClass}}" onClick="{{toSettings}}" aria-pressed="{{settingsPressed}}">Pengaturan</button>
+  </div>
+
+  <div class="body">
+  <sc-if value="{{onReceipt}}" hint-placeholder-val="{{true}}">
+  <div class="scroll"><div class="col">
+    <div class="photo" role="img" aria-label="Foto struk">foto struk</div>
+
+    <div class="form {{formWarnClass}}">
+      <label class="field">
+        <span class="flabel">Total</span>
+        <input class="input big" type="text" inputmode="numeric" autocomplete="off" placeholder="Rp0" value="{{totalText}}" onChange="{{onTotal}}">
+        <sc-if value="{{mismatch}}" hint-placeholder-val="{{true}}">
+          <span class="warnline">Jumlah item tidak cocok dengan total struk. Total struk dipakai.</span>
+        </sc-if>
+      </label>
+      <label class="field">
+        <span class="flabel">Merchant</span>
+        <input class="input" type="text" autocomplete="off" value="{{merchant}}" onChange="{{onMerchant}}">
+      </label>
+      <label class="field">
+        <span class="flabel">Tanggal</span>
+        <input class="input" type="date" value="{{date}}" onChange="{{onDate}}">
+      </label>
+      <label class="field">
+        <span class="flabel">Kategori</span>
+        <span class="selwrap">
+          <select class="input" value="{{categoryId}}" onChange="{{onCategory}}">
+            <sc-for list="{{categoryOptions}}" as="o" hint-placeholder-count="9"><option value="{{o.id}}">{{o.name}}</option></sc-for>
+          </select>
+          <span class="caret" aria-hidden="true">▾</span>
+        </span>
+      </label>
+
+      <button class="disclosure" onClick="{{toggleItems}}" aria-expanded="{{itemsExpandedStr}}">
+        <span>{{itemsTitle}}</span>
+        <span class="disc-hint">{{itemsHint}}</span>
+      </button>
+      <sc-if value="{{itemsOpen}}" hint-placeholder-val="{{false}}">
+        <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+          <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+            <div class="skel"><span class="bone" style="width: 150px"></span><span class="bone" style="width: 80px"></span></div>
+          </sc-for>
+        </sc-if>
+        <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+          <div class="note err">Item struk gagal dibaca. <button class="textbtn t13" onClick="{{retry}}">Coba lagi</button></div>
+        </sc-if>
+        <sc-if value="{{itemsEmpty}}" hint-placeholder-val="{{false}}">
+          <div class="note">Tidak ada item yang terbaca dari struk ini.</div>
+        </sc-if>
+        <sc-if value="{{itemsReady}}" hint-placeholder-val="{{true}}">
+          <sc-for list="{{items}}" as="it" hint-placeholder-count="7">
+            <div class="item">
+              <span class="item-name">{{it.name}}</span>
+              <span class="item-qty">{{it.qtyText}}</span>
+            </div>
+          </sc-for>
+          <div class="item-sum"><span>Jumlah item</span><span>{{itemsSumText}}</span></div>
+        </sc-if>
+      </sc-if>
+    </div>
+    <div class="spacer"></div>
+  </div></div>
+  </sc-if>
+
+  <sc-if value="{{onSettings}}" hint-placeholder-val="{{false}}">
+  <div class="scroll"><div class="col">
+    <div class="section">Penyedia AI</div>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+        <div class="skel"><span class="bone" style="width: 140px"></span><span class="bone" style="width: 72px"></span></div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+      <div class="note err">Daftar penyedia gagal dimuat. <button class="textbtn t13" onClick="{{retry}}">Coba lagi</button></div>
+    </sc-if>
+    <sc-if value="{{providersEmpty}}" hint-placeholder-val="{{false}}">
+      <div class="note">Belum ada penyedia AI. Tambahkan satu untuk membaca struk.</div>
+      <button class="addrow" onClick="{{openAdd}}">+ Tambah penyedia</button>
+    </sc-if>
+    <sc-if value="{{providersReady}}" hint-placeholder-val="{{true}}">
+      <sc-for list="{{providers}}" as="pv" hint-placeholder-count="3">
+        <div class="row">
+          <div class="row-main">
+            <span class="t16">{{pv.name}}</span>
+            <span class="meta">{{pv.model}}</span>
+          </div>
+          <div class="side">
+            <sc-if value="{{pv.active}}" hint-placeholder-val="{{false}}"><span class="t12">aktif</span></sc-if>
+            <span class="t12 muted mono-num">{{pv.keyHint}}</span>
+            <sc-if value="{{pv.inactive}}" hint-placeholder-val="{{true}}"><button class="textbtn" onClick="{{pv.makePrimary}}">Jadikan utama</button></sc-if>
+          </div>
+        </div>
+      </sc-for>
+      <button class="addrow" onClick="{{openAdd}}">+ Tambah penyedia</button>
+      <div class="actions">
+        <button class="ghost" onClick="{{testConnection}}" disabled="{{testing}}">Tes koneksi</button>
+        <sc-if value="{{testing}}" hint-placeholder-val="{{false}}">
+          <div class="loadrow">Menghubungi {{activeName}}…</div>
+        </sc-if>
+        <sc-if value="{{testOk}}" hint-placeholder-val="{{false}}">
+          <pre class="json">{{testJson}}</pre>
+        </sc-if>
+        <sc-if value="{{testFail}}" hint-placeholder-val="{{false}}">
+          <span class="errline">{{testError}}</span>
+        </sc-if>
+        <span class="helper">Provider harus mendukung input gambar dan format OpenAI /chat/completions.</span>
+      </div>
+    </sc-if>
+
+    <div class="section">Ekspor</div>
+    <div class="block">
+      <button class="primary" onClick="{{exportDrive}}" disabled="{{exporting}}">{{exportLabel}}</button>
+      <span class="meta">{{lastExportText}}</span>
+    </div>
+    <div class="row">
+      <span class="t16">Download ZIP foto bulan ini</span>
+    </div>
+    <div class="row">
+      <span class="meta">Bulan</span>
+      <div class="month">
+        <button class="arrow" aria-label="Bulan sebelumnya" onClick="{{prevMonth}}" disabled="{{prevDisabled}}">←</button>
+        <span class="month-label">{{zipMonthLabel}}</span>
+        <button class="arrow" aria-label="Bulan berikutnya" onClick="{{nextMonth}}" disabled="{{nextDisabled}}">→</button>
+      </div>
+    </div>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+        <div class="skel"><span class="bone" style="width: 220px"></span></div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+      <div class="note err">Daftar file gagal dimuat. <button class="textbtn t13" onClick="{{retry}}">Coba lagi</button></div>
+    </sc-if>
+    <sc-if value="{{filesEmpty}}" hint-placeholder-val="{{false}}">
+      <div class="note">Tidak ada foto struk di {{zipMonthLabel}}.</div>
+    </sc-if>
+    <sc-if value="{{filesReady}}" hint-placeholder-val="{{true}}">
+      <sc-for list="{{files}}" as="f" hint-placeholder-count="6">
+        <div class="file">{{f.name}}</div>
+      </sc-for>
+    </sc-if>
+
+    <div class="section">Keluarga</div>
+    <div class="row">
+      <div class="row-main">
+        <span class="flabel">Kode undangan</span>
+        <span class="code">{{inviteCode}}</span>
+      </div>
+      <button class="textbtn t13" onClick="{{copyCode}}">{{copyLabel}}</button>
+    </div>
+    <sc-if value="{{isLoading}}" hint-placeholder-val="{{false}}">
+      <sc-for list="{{skelRows}}" as="s" hint-placeholder-count="3">
+        <div class="skel"><span class="bone" style="width: 100px"></span><span class="bone" style="width: 80px"></span></div>
+      </sc-for>
+    </sc-if>
+    <sc-if value="{{isError}}" hint-placeholder-val="{{false}}">
+      <div class="note err">Anggota keluarga gagal dimuat. <button class="textbtn t13" onClick="{{retry}}">Coba lagi</button></div>
+    </sc-if>
+    <sc-if value="{{membersEmpty}}" hint-placeholder-val="{{false}}">
+      <div class="note">Belum ada anggota lain. Bagikan kode undangan di atas.</div>
+    </sc-if>
+    <sc-if value="{{membersReady}}" hint-placeholder-val="{{true}}">
+      <sc-for list="{{members}}" as="m" hint-placeholder-count="3">
+        <div class="row">
+          <span class="t16">{{m.name}}</span>
+          <span class="meta mono-num">{{m.countText}}</span>
+        </div>
+      </sc-for>
+    </sc-if>
+
+    <div class="section">Akun saya</div>
+    <div class="row">
+      <div class="row-main">
+        <span class="t16">{{me.name}}</span>
+        <span class="meta">{{me.email}}</span>
+      </div>
+      <button class="textbtn t13 danger" onClick="{{logout}}">{{logoutLabel}}</button>
+    </div>
+    <div class="spacer"></div>
+  </div></div>
+  </sc-if>
+  </div>
+
+  <sc-if value="{{onReceipt}}" hint-placeholder-val="{{true}}">
+    <div class="bottom">
+      <button class="primary" onClick="{{save}}" disabled="{{saveDisabled}}">{{saveLabel}}</button>
+      <a class="plain" href="Main.dc.html">Catat manual</a>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{addOpen}}" hint-placeholder-val="{{false}}">
+    <button class="backdrop" aria-label="Tutup tambah penyedia" onClick="{{closeAdd}}"></button>
+    <div class="sheet" role="dialog" aria-modal="true" aria-label="Tambah penyedia" onKeyDown="{{addKeys}}" ref="{{addSheetRef}}">
+      <div class="sheet-head">
+        <h2 class="sheet-title">Tambah penyedia</h2>
+        <button class="textbtn t13 pad" onClick="{{closeAdd}}">Batal</button>
+      </div>
+      <div class="sheet-body">
+        <div class="field" role="group" aria-label="Preset">
+          <span class="flabel">Preset</span>
+          <div class="presets">
+            <sc-for list="{{presets}}" as="ps" hint-placeholder-count="6">
+              <button class="preset {{ps.cls}}" onClick="{{ps.pick}}" aria-pressed="{{ps.pressed}}">{{ps.label}}</button><sc-if value="{{ps.sep}}" hint-placeholder-val="{{true}}"><span class="sep" aria-hidden="true">·</span></sc-if>
+            </sc-for>
+          </div>
+        </div>
+        <label class="field">
+          <span class="flabel">Nama penyedia</span>
+          <input class="input" type="text" autocomplete="off" value="{{add.name}}" onChange="{{onAddName}}">
+        </label>
+        <label class="field">
+          <span class="flabel">Base URL</span>
+          <input class="input" type="url" autocomplete="off" spellcheck="false" placeholder="https://" value="{{add.baseUrl}}" onChange="{{onAddBase}}">
+          <span class="fhelp">{{baseHelper}}</span>
+        </label>
+        <label class="field">
+          <span class="flabel">Model</span>
+          <input class="input" type="text" autocomplete="off" spellcheck="false" value="{{add.model}}" onChange="{{onAddModel}}">
+          <span class="fhelp">{{modelHelper}}</span>
+        </label>
+        <label class="field">
+          <span class="flabel">Temperature</span>
+          <input class="input mono-num" type="text" inputmode="decimal" autocomplete="off" value="{{add.temperature}}" onChange="{{onAddTemp}}">
+        </label>
+        <div class="field toggle-row">
+          <span class="flabel" id="jsonmode-label">Mode JSON</span>
+          <button class="switch {{jsonCls}}" role="switch" aria-checked="{{jsonChecked}}" aria-labelledby="jsonmode-label" onClick="{{toggleJson}}">
+            <span>{{jsonText}}</span>
+            <span class="track-s" aria-hidden="true"><span class="knob"></span></span>
+          </button>
+        </div>
+        <div class="field">
+          <label class="flabel" for="add-apikey">API key</label>
+          <div class="keyrow">
+            <input id="add-apikey" class="input" type="{{keyType}}" autocomplete="off" spellcheck="false" value="{{add.apiKey}}" onChange="{{onAddKey}}">
+            <sc-if value="{{hasKey}}" hint-placeholder-val="{{false}}">
+              <button class="textbtn" onClick="{{toggleShowKey}}">{{showKeyLabel}}</button>
+            </sc-if>
+          </div>
+        </div>
+        <sc-if value="{{addTesting}}" hint-placeholder-val="{{false}}">
+          <div class="testskel" ref="{{resultRef}}" aria-label="Menguji koneksi">
+            <span class="bone" style="width: 60%"></span>
+            <span class="bone" style="width: 85%"></span>
+            <span class="bone" style="width: 40%"></span>
+          </div>
+        </sc-if>
+        <sc-if value="{{addOk}}" hint-placeholder-val="{{false}}">
+          <div class="result" ref="{{resultRef}}">
+            <span class="t12">berhasil</span>
+            <pre class="json">{{addJson}}</pre>
+          </div>
+        </sc-if>
+        <sc-if value="{{addFail}}" hint-placeholder-val="{{false}}">
+          <div class="result" ref="{{resultRef}}">
+            <span class="errline">{{addError}}</span>
+          </div>
+        </sc-if>
+      </div>
+      <div class="sheet-foot">
+        <span class="sr-only" role="status" aria-live="polite">{{addLiveText}}</span>
+        <span class="helper">Key disimpan di server dan tidak pernah dikirim ke browser.</span>
+        <div class="foot-btns">
+          <button class="hair" onClick="{{addTestRun}}" disabled="{{addTestDisabled}}">Tes koneksi</button>
+          <button class="primary" onClick="{{addSave}}" disabled="{{addSaveDisabled}}">Simpan</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startScreen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;receipt&quot;,&quot;settings&quot;],&quot;default&quot;:&quot;receipt&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;perluDicek&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;section&quot;:&quot;Tampilan&quot;},&quot;dataState&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;data&quot;,&quot;loading&quot;,&quot;empty&quot;,&quot;error&quot;],&quot;default&quot;:&quot;loading&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;tesHasil&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sukses&quot;,&quot;gagal&quot;],&quot;default&quot;:&quot;sukses&quot;,&quot;section&quot;:&quot;Tampilan&quot;},&quot;$preview&quot;:{&quot;width&quot;:390,&quot;height&quot;:844}}">
+const MOCK = {
+  receipt: {
+    merchant: "Indomaret Kemang Raya",
+    date: "2026-11-11",
+    categoryId: "belanja",
+    totalOnReceipt: 182400,
+    items: [
+      { name: "Indomie Goreng", qty: 5, price: 3500 },
+      { name: "Aqua 1500 ml", qty: 2, price: 6500 },
+      { name: "Telur ayam 1 kg", qty: 1, price: 29500 },
+      { name: "Minyak Bimoli 2 L", qty: 1, price: 38900 },
+      { name: "Gulaku 1 kg", qty: 1, price: 17900 },
+      { name: "Susu UHT Ultra 1 L", qty: 2, price: 19800 },
+      { name: "Sari Roti tawar", qty: 2, price: 12000 }
+    ]
+  },
+  categories: [
+    { id: "belanja", name: "Belanja harian" },
+    { id: "makan", name: "Makan" },
+    { id: "transport", name: "Transportasi" },
+    { id: "listrik", name: "Listrik & air" },
+    { id: "pulsa", name: "Pulsa & internet" },
+    { id: "rumah", name: "Rumah tangga" },
+    { id: "sehat", name: "Kesehatan" },
+    { id: "sekolah", name: "Pendidikan" },
+    { id: "lain", name: "Lainnya" }
+  ],
+  providers: [
+    { id: "openrouter", name: "OpenRouter", model: "qwen/qwen2.5-vl-72b-instruct", keyHint: "sk-...a1b2", active: true },
+    { id: "openai", name: "OpenAI", model: "gpt-4o-mini", keyHint: "sk-...9f3c", active: false },
+    { id: "together", name: "Together AI", model: "meta-llama/Llama-3.2-11B-Vision-Instruct", keyHint: "sk-...7d40", active: false }
+  ],
+  presets: [
+    { id: "openrouter", label: "OpenRouter", name: "OpenRouter", baseUrl: "https://openrouter.ai/api/v1", model: "qwen/qwen2.5-vl-72b-instruct" },
+    { id: "deepseek", label: "DeepSeek", name: "DeepSeek", baseUrl: "https://api.deepseek.com/v1", model: "deepseek-chat" },
+    { id: "openai", label: "OpenAI", name: "OpenAI", baseUrl: "https://api.openai.com/v1", model: "gpt-4o-mini" },
+    { id: "gemini", label: "Google Gemini (endpoint kompatibel OpenAI)", name: "Google Gemini", baseUrl: "https://generativelanguage.googleapis.com/v1beta/openai/", model: "gemini-2.5-flash" },
+    { id: "groq", label: "Groq", name: "Groq", baseUrl: "https://api.groq.com/openai/v1", model: "meta-llama/llama-4-scout-17b-16e-instruct" },
+    { id: "lainnya", label: "Lainnya", name: "", baseUrl: "", model: "" }
+  ],
+  addTestError: "Incorrect API key provided. You can find your API key in your account settings.",
+  testResponse: {
+    id: "chatcmpl-8x2kQ4",
+    object: "chat.completion",
+    model: "qwen/qwen2.5-vl-72b-instruct",
+    choices: [{ index: 0, message: { role: "assistant", content: "OK" }, finish_reason: "stop" }],
+    usage: { prompt_tokens: 14, completion_tokens: 1, total_tokens: 15 }
+  },
+  testError: "Koneksi gagal: 401 Unauthorized. API key ditolak penyedia.",
+  lastExport: "10 November 2026, 21.14",
+  photos: [
+    { date: "2026-11-11", slug: "indomaret-kemang-raya" },
+    { date: "2026-11-09", slug: "superindo" },
+    { date: "2026-11-05", slug: "sate-khas-senayan" },
+    { date: "2026-11-03", slug: "hypermart" },
+    { date: "2026-11-01", slug: "pasar-minggu" },
+    { date: "2026-11-01", slug: "shopee" },
+    { date: "2026-10-28", slug: "indomaret" },
+    { date: "2026-10-15", slug: "ace-hardware" },
+    { date: "2026-10-02", slug: "giant" }
+  ],
+  family: {
+    household: "Rumah Adhi",
+    inviteCode: "482917",
+    members: [
+      { name: "Adhi", transactions: 18 },
+      { name: "Rina", transactions: 6 },
+      { name: "Raka", transactions: 1 }
+    ]
+  },
+  me: { name: "Adhi", email: "adhi@contoh.id" }
+};
+
+const CURRENT_YM = "2026-11";
+const MIN_YM = "2026-01";
+const MONTHS = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+
+function rp(n) {
+  return "Rp" + String(Math.round(Math.abs(n || 0))).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
+function shiftYm(ym, d) {
+  let y = Number(ym.slice(0, 4)), m = Number(ym.slice(5, 7)) + d;
+  if (m < 1) { m = 12; y -= 1; }
+  if (m > 12) { m = 1; y += 1; }
+  return y + "-" + String(m).padStart(2, "0");
+}
+function ymLabel(ym) { return MONTHS[Number(ym.slice(5, 7)) - 1] + " " + ym.slice(0, 4); }
+const ITEMS_SUM = MOCK.receipt.items.reduce((t, it) => t + it.qty * it.price, 0);
+const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), a[href]';
+// Escape closes the sheet; Tab wraps inside it so focus never lands behind the backdrop.
+function sheetKeys(e, onClose) {
+  if (e.key === "Escape") { e.preventDefault(); onClose(); return; }
+  if (e.key !== "Tab") return;
+  const items = Array.prototype.slice.call(e.currentTarget.querySelectorAll(FOCUSABLE));
+  if (!items.length) return;
+  const first = items[0], last = items[items.length - 1], cur = document.activeElement;
+  if (e.shiftKey && (cur === first || !e.currentTarget.contains(cur))) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && cur === last) { e.preventDefault(); first.focus(); }
+}
+// After a sheet closes, focus goes back to whatever opened it, or to the fallback when that control is gone.
+function restoreFocus(el, fallbackSelector) {
+  setTimeout(() => {
+    const target = el && el.isConnected ? el : document.querySelector(fallbackSelector);
+    if (target) { try { target.focus({ preventScroll: true }); } catch (e) {} }
+  }, 0);
+}
+function blankAdd() {
+  return { preset: "", name: "", baseUrl: "", model: "", temperature: "0", jsonMode: true, apiKey: "", showKey: false };
+}
+function startTotal(needsCheck) { return needsCheck === false ? ITEMS_SUM : MOCK.receipt.totalOnReceipt; }
+
+class Component extends DCLogic {
+  state = {
+    screen: (this.props && this.props.startScreen) || "receipt",
+    total: startTotal(this.props && this.props.perluDicek),
+    merchant: MOCK.receipt.merchant,
+    date: MOCK.receipt.date,
+    categoryId: MOCK.receipt.categoryId,
+    itemsOpen: false,
+    saved: false,
+    ds: null,
+    providers: MOCK.providers.map((p) => Object.assign({}, p)),
+    test: "idle",
+    exporting: false,
+    lastExport: MOCK.lastExport,
+    zipYm: CURRENT_YM,
+    copied: false,
+    loggedOut: false,
+    addOpen: false,
+    add: blankAdd(),
+    addTest: "idle",
+    addTestedOk: false
+  };
+
+  addSheetRef = (el) => {
+    if (el && el !== this._addSheet) {
+      this._addSheet = el;
+      const first = el.querySelector(".preset") || el.querySelector("button");
+      if (first) { try { first.focus({ preventScroll: true }); } catch (e) {} }
+    }
+    if (!el) this._addSheet = null;
+  };
+
+  closeAddSheet() {
+    clearTimeout(this._addT);
+    this.setState({ addOpen: false, addTest: "idle" });
+    restoreFocus(this._returnEl, ".app .addrow");
+  }
+
+  resultRef = (el) => {
+    if (el) { try { el.scrollIntoView({ block: "nearest" }); } catch (e) {} }
+  };
+
+  setAdd(key) {
+    return (e) => {
+      const v = e.target.value;
+      this.setState((st) => ({ add: Object.assign({}, st.add, { [key]: v }) }));
+    };
+  }
+
+  componentDidUpdate(pp) {
+    const p = this.props;
+    if (pp.startScreen !== p.startScreen) this.setState({ screen: p.startScreen || "receipt" });
+    if (pp.perluDicek !== p.perluDicek) this.setState({ total: startTotal(p.perluDicek), saved: false });
+    if (pp.dataState !== p.dataState && this.state.ds) this.setState({ ds: null });
+    if (pp.tesHasil !== p.tesHasil) this.setState({ test: "idle" });
+  }
+
+  componentWillUnmount() {
+    clearTimeout(this._testT);
+    clearTimeout(this._exportT);
+    clearTimeout(this._copyT);
+    clearTimeout(this._addT);
+  }
+
+  setField(key) {
+    return (e) => this.setState({ [key]: e.target.value, saved: false });
+  }
+
+  renderVals() {
+    const s = this.state;
+    const p = this.props;
+    const eff = s.ds || p.dataState || "data";
+    const isLoading = eff === "loading";
+    const isError = eff === "error";
+    const blank = isLoading || isError;
+    const forceEmpty = eff === "empty";
+
+    const items = forceEmpty ? [] : MOCK.receipt.items;
+    const mismatch = items.length > 0 && s.total !== ITEMS_SUM;
+    const active = s.providers.find((x) => x.active) || s.providers[0];
+    const providers = forceEmpty ? [] : s.providers;
+    const files = forceEmpty ? [] : MOCK.photos
+      .filter((ph) => ph.date.slice(0, 7) === s.zipYm)
+      .map((ph, i, arr) => {
+        const same = arr.filter((x) => x.date === ph.date);
+        const n = same.length > 1 ? "-" + (same.indexOf(ph) + 1) : "";
+        return { name: "struk-" + ph.date + "-" + ph.slug + n + ".jpg" };
+      });
+    const members = forceEmpty ? [] : MOCK.family.members;
+    const addPreset = MOCK.presets.find((x) => x.id === s.add.preset) || null;
+
+    return {
+      onReceipt: s.screen === "receipt",
+      onSettings: s.screen === "settings",
+      tabReceiptClass: s.screen === "receipt" ? "on" : "",
+      tabSettingsClass: s.screen === "settings" ? "on" : "",
+      receiptPressed: s.screen === "receipt" ? "true" : "false",
+      settingsPressed: s.screen === "settings" ? "true" : "false",
+      toReceipt: () => this.setState({ screen: "receipt" }),
+      toSettings: () => this.setState({ screen: "settings" }),
+
+      isLoading,
+      isError,
+      skelRows: [0, 1, 2],
+      retry: () => this.setState({ ds: "data" }),
+
+      totalText: s.total ? rp(s.total) : "",
+      onTotal: (e) => {
+        const digits = e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 12);
+        this.setState({ total: Number(digits) || 0, saved: false });
+      },
+      mismatch,
+      formWarnClass: mismatch ? "warn" : "",
+      merchant: s.merchant,
+      date: s.date,
+      categoryId: s.categoryId,
+      onMerchant: this.setField("merchant"),
+      onDate: this.setField("date"),
+      onCategory: this.setField("categoryId"),
+      categoryOptions: MOCK.categories,
+
+      itemsTitle: "Item (" + items.length + ")",
+      itemsHint: s.itemsOpen ? "Sembunyikan" : "Tampilkan",
+      itemsOpen: s.itemsOpen,
+      itemsExpandedStr: s.itemsOpen ? "true" : "false",
+      toggleItems: () => this.setState({ itemsOpen: !s.itemsOpen }),
+      itemsEmpty: !blank && items.length === 0,
+      itemsReady: !blank && items.length > 0,
+      items: items.map((it) => ({ name: it.name, qtyText: it.qty + " x " + rp(it.price) })),
+      itemsSumText: rp(ITEMS_SUM),
+
+      saveLabel: s.saved ? "Tersimpan" : "Simpan",
+      saveDisabled: s.saved || !(s.total > 0),
+      save: () => this.setState({ saved: true }),
+
+      providersEmpty: !blank && providers.length === 0,
+      providersReady: !blank && providers.length > 0,
+      providers: providers.map((pv) => ({
+        name: pv.name,
+        model: pv.model,
+        keyHint: pv.keyHint,
+        active: pv.active,
+        inactive: !pv.active,
+        makePrimary: () => this.setState({
+          providers: s.providers.map((x) => Object.assign({}, x, { active: x.id === pv.id })),
+          test: "idle"
+        })
+      })),
+      activeName: active ? active.name : "penyedia",
+      testing: s.test === "loading",
+      testOk: s.test === "ok",
+      testFail: s.test === "fail",
+      testJson: JSON.stringify(Object.assign({}, MOCK.testResponse, { model: active ? active.model : "" }), null, 2),
+      testError: MOCK.testError,
+      testConnection: () => {
+        clearTimeout(this._testT);
+        this.setState({ test: "loading" });
+        this._testT = setTimeout(() => this.setState({ test: (this.props.tesHasil || "sukses") === "gagal" ? "fail" : "ok" }), 900);
+      },
+
+      exporting: s.exporting,
+      exportLabel: s.exporting ? "Mengekspor…" : "Export ke Google Drive",
+      lastExportText: "Terakhir diekspor " + s.lastExport,
+      exportDrive: () => {
+        clearTimeout(this._exportT);
+        this.setState({ exporting: true });
+        this._exportT = setTimeout(() => this.setState({ exporting: false, lastExport: "11 November 2026, 09.30" }), 1200);
+      },
+      zipMonthLabel: ymLabel(s.zipYm),
+      prevDisabled: s.zipYm <= MIN_YM,
+      nextDisabled: s.zipYm >= CURRENT_YM,
+      prevMonth: () => this.setState({ zipYm: shiftYm(s.zipYm, -1) }),
+      nextMonth: () => this.setState({ zipYm: shiftYm(s.zipYm, 1) }),
+      filesEmpty: !blank && files.length === 0,
+      filesReady: !blank && files.length > 0,
+      files: files.length ? [{ name: "struk-rumah-adhi-" + s.zipYm + ".zip" }].concat(files) : [],
+
+      inviteCode: MOCK.family.inviteCode,
+      copyLabel: s.copied ? "Tersalin" : "Salin",
+      copyCode: () => {
+        try { navigator.clipboard && navigator.clipboard.writeText(MOCK.family.inviteCode); } catch (e) {}
+        clearTimeout(this._copyT);
+        this.setState({ copied: true });
+        this._copyT = setTimeout(() => this.setState({ copied: false }), 1500);
+      },
+      membersEmpty: !blank && members.length === 0,
+      membersReady: !blank && members.length > 0,
+      members: members.map((m) => ({ name: m.name, countText: m.transactions + " transaksi" })),
+
+      addOpen: s.addOpen,
+      openAdd: () => {
+        this._returnEl = document.activeElement;
+        this.setState({ addOpen: true, add: blankAdd(), addTest: "idle", addTestedOk: false });
+      },
+      closeAdd: () => this.closeAddSheet(),
+      addKeys: (e) => sheetKeys(e, () => this.closeAddSheet()),
+      addSheetRef: this.addSheetRef,
+      add: s.add,
+      presets: MOCK.presets.map((ps, i) => ({
+        label: ps.label,
+        cls: s.add.preset === ps.id ? "on" : "",
+        pressed: s.add.preset === ps.id ? "true" : "false",
+        sep: i < MOCK.presets.length - 1,
+        pick: () => this.setState((st) => ({
+          add: Object.assign({}, st.add, { preset: ps.id, name: ps.name, baseUrl: ps.baseUrl, model: ps.model })
+        }))
+      })),
+      baseHelper: addPreset ? (addPreset.baseUrl ? "Dari preset " + addPreset.name + ": " + addPreset.baseUrl : "Preset Lainnya tidak mengisi kolom ini.") : "Pilih preset untuk mengisi otomatis.",
+      modelHelper: addPreset ? (addPreset.model ? "Dari preset " + addPreset.name + ": " + addPreset.model : "Preset Lainnya tidak mengisi kolom ini.") : "Pilih preset untuk mengisi otomatis.",
+      onAddName: this.setAdd("name"),
+      onAddBase: this.setAdd("baseUrl"),
+      onAddModel: this.setAdd("model"),
+      onAddTemp: (e) => {
+        const v = e.target.value.replace(",", ".").replace(/[^0-9.]/g, "").slice(0, 4);
+        this.setState((st) => ({ add: Object.assign({}, st.add, { temperature: v }) }));
+      },
+      onAddKey: this.setAdd("apiKey"),
+      jsonCls: s.add.jsonMode ? "on" : "",
+      jsonChecked: s.add.jsonMode ? "true" : "false",
+      jsonText: s.add.jsonMode ? "Aktif" : "Nonaktif",
+      toggleJson: () => this.setState((st) => ({ add: Object.assign({}, st.add, { jsonMode: !st.add.jsonMode }) })),
+      keyType: s.add.showKey ? "text" : "password",
+      hasKey: s.add.apiKey.length > 0,
+      showKeyLabel: s.add.showKey ? "sembunyikan" : "tampilkan",
+      toggleShowKey: () => this.setState((st) => ({ add: Object.assign({}, st.add, { showKey: !st.add.showKey }) })),
+      addTesting: s.addTest === "loading",
+      addOk: s.addTest === "ok",
+      addFail: s.addTest === "fail",
+      addJson: JSON.stringify(Object.assign({}, MOCK.testResponse, { model: s.add.model.trim() }), null, 2),
+      addError: MOCK.addTestError,
+      addTestDisabled: s.addTest === "loading" || !s.add.baseUrl.trim() || !s.add.model.trim() || !s.add.apiKey,
+      addTestRun: () => {
+        clearTimeout(this._addT);
+        this.setState({ addTest: "loading" });
+        this._addT = setTimeout(() => {
+          const ok = (this.props.tesHasil || "sukses") !== "gagal";
+          this.setState((st) => ({ addTest: ok ? "ok" : "fail", addTestedOk: st.addTestedOk || ok }));
+        }, 900);
+      },
+      addSaveDisabled: !s.addTestedOk,
+      addSave: () => {
+        const a = this.state.add;
+        const pre = MOCK.presets.find((x) => x.id === a.preset);
+        const rec = {
+          id: "p" + Date.now(),
+          name: a.name.trim() || (pre && pre.name) || "Penyedia baru",
+          model: a.model.trim(),
+          keyHint: "sk-..." + a.apiKey.slice(-4),
+          active: false
+        };
+        clearTimeout(this._addT);
+        this.setState((st) => ({ providers: st.providers.concat([rec]), addOpen: false, addTest: "idle", add: blankAdd() }));
+        restoreFocus(this._returnEl, ".app .addrow");
+      },
+
+      liveText: s.addOpen ? "" : s.screen === "settings"
+        ? (s.test === "loading" ? "Menguji koneksi ke " + (active ? active.name : "penyedia") + "."
+          : s.test === "ok" ? "Koneksi berhasil."
+          : s.test === "fail" ? MOCK.testError
+          : s.copied ? "Kode undangan disalin."
+          : s.exporting ? "Mengekspor ke Google Drive." : "")
+        : (mismatch ? "Jumlah item tidak cocok dengan total struk. Total struk dipakai." : ""),
+      addLiveText: s.addTest === "loading" ? "Menguji koneksi." : s.addTest === "ok" ? "Koneksi berhasil." : s.addTest === "fail" ? MOCK.addTestError : "",
+      me: MOCK.me,
+      logoutLabel: "Keluar",
+      logout: () => this.setState({ loggedOut: true })
+    };
+  }
+}
+</script>
+</body>
+</html>

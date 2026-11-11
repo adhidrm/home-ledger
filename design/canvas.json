@@ -1,0 +1,37 @@
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "Main.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Buku belanja · 390×844",
+      "w": 390,
+      "x": -18,
+      "y": -93
+    },
+    "Struk.dc.html": {
+      "h": 844,
+      "is_interactive": true,
+      "title": "Review struk dan pengaturan · 390×844",
+      "w": 390,
+      "x": 452,
+      "y": -93
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-11T09:00:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "view": "canvas"
+  },
+  "notes": {},
+  "order": [
+    "Main.dc.html",
+    "Struk.dc.html"
+  ],
+  "pages": [],
+  "title": "Buku Belanja Rumah"
+}
