@@ -1,4 +1,8 @@
-/* Token dan bahasa visual dari design/*.dc.html: kertas buku kas, garis tipis, satu aksen bata. */
+/* Hallmark · app shell, bukan landing page · design/*.dc.html: kertas buku kas, garis tipis, satu aksen bata
+   Theme: paper/ink/rule/brick, all tokenised · nav: tabs row · footer: none (app) · job: book a household ledger
+   Waived 24b ×6: hairline rules need optical padding off the 4px scale (field, note, chip, item-sum, cat, track2)
+   Waived 63: the ← → month pager is one icon-only control carrying its own aria-label; no suffix is glued
+   Waived 78: app UI, section heads are inline labels under a 32px screen title, not landing-page h2s */
 :root {
   --paper: #f7f5f0;
   --paper-sunk: #efece4;
@@ -7,7 +11,14 @@
   --rule: #d5d0c2;
   --accent: #a63e1b;
   --accent-ink: #fff8f2;
+  --scrim: rgb(23 23 20 / 0.32);
+  /* disabled needs three channels: fill, ink, cursor. */
+  --off-fill: #e6e2d8;
+  --off-ink: #5f5d54;
   --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  /* Tipe satu langkah di atas label, di bawah judul layar. */
+  --text-section: 19px;
+  --text-figure: 40px;
   color-scheme: light;
 }
 
@@ -15,8 +26,8 @@
 html, body { margin: 0; overflow-x: clip; background: var(--paper); color: var(--ink); font-family: var(--font); }
 button, input, select { font: inherit; color: inherit; margin: 0; border-radius: 0; }
 button { background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
-button:active:not(:disabled) { opacity: 0.6; }
-button:disabled { color: var(--ink-muted); cursor: not-allowed; }
+button:active:not(:disabled) { background: var(--paper-sunk); }
+button:disabled { color: var(--off-ink); cursor: not-allowed; }
 a { color: inherit; }
 :focus { outline: none; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -27,10 +38,10 @@ a { color: inherit; }
 .top h1 { margin: 0; font-size: 15px; font-weight: 500; }
 
 .hero { padding: 40px 16px 24px; border-bottom: 1px solid var(--rule); }
-.hero h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 34px; }
+.hero h1 { margin: 0; font-size: 28px; font-weight: 600; line-height: 34px; text-wrap: balance; }
 .hero p { margin: 8px 0 0; font-size: 15px; line-height: 22px; color: var(--ink-muted); }
 
-.section { margin: 0; padding: 24px 16px 8px; font-size: 13px; font-weight: 500; color: var(--ink-muted); border-bottom: 1px solid var(--rule); }
+.section { margin: 0; padding: 24px 16px 8px; font-size: var(--text-section); font-weight: 600; color: var(--ink); border-bottom: 1px solid var(--rule); text-wrap: balance; }
 
 .field { display: flex; flex-direction: column; gap: 2px; padding: 10px 16px 8px; border-bottom: 1px solid var(--rule); }
 .field:focus-within { background: var(--paper-sunk); }
@@ -41,7 +52,7 @@ a { color: inherit; }
 
 .actions { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
 .primary { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; background: var(--accent); color: var(--accent-ink); font-size: 16px; font-weight: 500; text-align: center; }
-.primary:disabled { background: var(--paper-sunk); color: var(--ink-muted); border: 1px solid var(--rule); }
+.primary:disabled { background: var(--off-fill); color: var(--off-ink); border: 1px solid var(--rule); cursor: not-allowed; }
 .ghost { display: flex; align-items: center; justify-content: center; width: 100%; height: 52px; border: 1px solid var(--ink); font-size: 16px; font-weight: 500; text-align: center; }
 .ghost:disabled { border-color: var(--rule); }
 .textbtn { min-height: 44px; font-size: 13px; font-weight: 500; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule); text-align: right; }
@@ -84,7 +95,7 @@ button.row { width: 100%; }
 .bottom { position: sticky; bottom: 0; padding: 12px 16px 16px; border-top: 1px solid var(--rule); background: var(--paper); }
 
 .sheet { position: fixed; inset: auto 0 0 0; margin: 0 auto; width: 100%; max-width: 520px; max-height: calc(100dvh - 24px); overflow-y: auto; padding: 0; border: 0; border-top: 1px solid var(--rule); background: var(--paper); color: var(--ink); }
-.sheet::backdrop { background: rgb(23 23 20 / 0.32); }
+.sheet::backdrop { background: var(--scrim); }
 .sheet-head { display: flex; justify-content: space-between; align-items: center; height: 52px; padding-left: 16px; border-bottom: 1px solid var(--rule); }
 .sheet-title { margin: 0; font-size: 16px; font-weight: 500; }
 .sheet-foot { padding: 16px; display: flex; flex-direction: column; gap: 12px; }
