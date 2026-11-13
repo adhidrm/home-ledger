@@ -19,8 +19,9 @@ const csv = (head: string[], rows: unknown[][]) =>
 /** Isi ekspor (spec §4): satu JSON lengkap + CSV per tabel. Nama file tetap. */
 export async function exportData(): Promise<{ files?: ExportFile[]; error?: string }> {
   const { supabase } = await requireLedger();
-  const [tx, acc, bal, cat, adj, bills, pays, caps, rcp, items] = await Promise.all([
+  const [tx, inc, acc, bal, cat, adj, bills, pays, caps, rcp, items] = await Promise.all([
     supabase.from('transactions').select('*').order('date'),
+    supabase.from('incomes').select('*').order('date'),
     supabase.from('accounts').select('*').order('name'),
     supabase.from('account_balances').select('id, balance'),
     supabase.from('categories').select('*').order('sort'),
@@ -31,13 +32,13 @@ export async function exportData(): Promise<{ files?: ExportFile[]; error?: stri
     supabase.from('receipts').select('id, ledger_id, storage_path, status, parsed_total, uploaded_at'),
     supabase.from('receipt_items').select('*'),
   ]);
-  if ([tx, acc, bal, cat, adj, bills, pays, caps, rcp, items].some((r) => r.error)) return { error: 'Data gagal dibaca. Coba lagi.' };
+  if ([tx, inc, acc, bal, cat, adj, bills, pays, caps, rcp, items].some((r) => r.error)) return { error: 'Data gagal dibaca. Coba lagi.' };
 
   const name = (list: { id: string; name: string }[], id: string) => list.find((x) => x.id === id)?.name ?? '';
   const balance = (id: string) => bal.data!.find((b) => b.id === id)?.balance ?? '';
   const json = {
     exported_at: new Date().toISOString(),
-    transactions: tx.data, accounts: acc.data, categories: cat.data, account_adjustments: adj.data,
+    transactions: tx.data, incomes: inc.data, accounts: acc.data, categories: cat.data, account_adjustments: adj.data,
     bills: bills.data, bill_payments: pays.data, budget_caps: caps.data, receipts: rcp.data, receipt_items: items.data,
   };
 
@@ -48,6 +49,11 @@ export async function exportData(): Promise<{ files?: ExportFile[]; error?: stri
         name: 'transaksi.csv', mime: 'text/csv',
         content: csv(['tanggal', 'jumlah', 'akun', 'kategori', 'merchant', 'catatan', 'sumber'],
           tx.data!.map((t) => [t.date, t.amount, name(acc.data!, t.account_id), name(cat.data!, t.category_id), t.merchant, t.note, t.source])),
+      },
+      {
+        name: 'pemasukan.csv', mime: 'text/csv',
+        content: csv(['tanggal', 'jumlah', 'akun', 'sumber'],
+          inc.data!.map((i) => [i.date, i.amount, name(acc.data!, i.account_id), i.source])),
       },
       {
         name: 'akun.csv', mime: 'text/csv',

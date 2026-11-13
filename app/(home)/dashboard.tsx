@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { MoneyInput } from '@/components/money-input';
 import { Sheet } from '@/components/sheet';
 import { ACCOUNT_TYPES, rp, shiftYm, ymLabel, type AccountType } from '@/lib/format';
+import { IncomeForm, type IncomeAccount } from '../pemasukan/income-screen';
 import { TxForm, type Named } from '../pengeluaran/tx-screen';
 import { PhotoButton } from '../struk/photo-button';
 import { saveCap } from './budget-actions';
@@ -15,6 +16,8 @@ export function Dashboard(props: {
   current: string;
   failed: boolean;
   spent: number;
+  income: number;
+  incomeTargets: IncomeAccount[];
   cap: number | null;
   lastCap: number;
   owed: number;
@@ -24,12 +27,16 @@ export function Dashboard(props: {
   accounts: Named[];
   categories: Named[];
 }) {
-  const { ym, current, failed, spent, cap, owed, owedCount, balances, cats, accounts, categories } = props;
+  const { ym, current, failed, spent, income, incomeTargets, cap, owed, owedCount, balances, cats, accounts, categories } = props;
   const [sheet, setSheet] = useState<'cap' | 'tx' | null>(null);
+  const [kind, setKind] = useState<'out' | 'in'>('out');
   const [allAcc, setAllAcc] = useState(false);
   const close = () => setSheet(null);
   const href = (m: string) => (m === current ? '/' : `/?m=${m}`);
   const listHref = ym === current ? '/pengeluaran' : `/pengeluaran?m=${ym}`;
+  const incomeHref = ym === current ? '/pemasukan' : `/pemasukan?m=${ym}`;
+  // Dua bar berbagi satu skala, supaya panjangnya bisa dibandingkan langsung.
+  const scale = Math.max(income, spent, 1);
   const hasAccounts = accounts.some((a) => !a.archived_at);
 
   // Spec: < 70% aman, 70–99% mendekati, >= 100% lewat. Palet kertas: tinta, lalu bata saat lewat.
@@ -60,26 +67,46 @@ export function Dashboard(props: {
       </div>
 
       <div className="strip">
-        <div className="strip-head">
-          <span className="flabel">Pengeluaran {ym === current ? 'bulan ini' : ymLabel(ym)}</span>
-          <a className="textbtn" href={listHref}>Lihat daftar</a>
+        <div className="flow">
+          <a className="flow-col" href={incomeHref}>
+            <span className="flow-label">Masuk</span>
+            <span className="flow-fig">{rp(income)}</span>
+            <span className="track" aria-hidden="true"><span className="fill" style={{ transform: `scaleX(${income / scale})` }} /></span>
+          </a>
+          <a className="flow-col" href={listHref}>
+            <span className="flow-label">Keluar</span>
+            <span className="flow-fig">{rp(spent)}</span>
+            <span className="track" aria-hidden="true">
+              <span className={income > 0 && spent > income ? 'fill over' : 'fill'} style={{ transform: `scaleX(${spent / scale})` }} />
+            </span>
+          </a>
         </div>
-        <div className="figure">{rp(spent)}</div>
-        {cap ? (
-          <>
-            <div className="capbar">
-              <div className="track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct * 100)} aria-label="Pemakaian batas bulanan">
-                <div className={`fill ${level}`} style={{ transform: `scaleX(${Math.min(pct, 1)})` }} />
-              </div>
-              <button className="textbtn" onClick={() => setSheet('cap')}>dari {rp(cap)}</button>
-            </div>
-            <p className={`capstatus ${level}`}>
-              {level === 'over' ? `Lewat batas ${rp(spent - cap)}` : level === 'near' ? `Mendekati batas, sisa ${rp(cap - spent)}` : `Sisa ${rp(cap - spent)}`}
-            </p>
-          </>
-        ) : (
-          <button className="textbtn" onClick={() => setSheet('cap')}>Atur batas bulanan</button>
+        {income > 0 ? (
+          <p className={spent > income ? 'capstatus over' : 'capstatus'}>
+            {spent > income ? `Kurang ${rp(spent - income)}` : `Sisa ${rp(income - spent)}`}
+          </p>
+        ) : incomeTargets.length > 0 && (
+          // Tanpa pemasukan, "Kurang Rp…" menyesatkan: tawarkan mencatat, jangan menghitung selisih.
+          <button className="textbtn" onClick={() => { setKind('in'); setSheet('tx'); }}>Catat pemasukan</button>
         )}
+        <div className="capblock">
+          {cap ? (
+            <>
+              <span className="flabel">Batas pengeluaran</span>
+              <div className="capbar">
+                <div className="track" role="progressbar" aria-valuemin={0} aria-valuemax={100} aria-valuenow={Math.round(pct * 100)} aria-label="Pemakaian batas bulanan">
+                  <div className={`fill ${level}`} style={{ transform: `scaleX(${Math.min(pct, 1)})` }} />
+                </div>
+                <button className="textbtn" onClick={() => setSheet('cap')}>dari {rp(cap)}</button>
+              </div>
+              <p className={`capstatus ${level}`}>
+                {level === 'over' ? `Lewat batas ${rp(spent - cap)}` : level === 'near' ? `Mendekati batas, sisa ${rp(cap - spent)}` : `Sisa batas ${rp(cap - spent)}`}
+              </p>
+            </>
+          ) : (
+            <button className="textbtn" onClick={() => setSheet('cap')}>Atur batas bulanan</button>
+          )}
+        </div>
       </div>
 
       <a className="row" href="/tagihan">
@@ -150,16 +177,34 @@ export function Dashboard(props: {
       <div className="bottom">
         <div className="foot-btns">
           <PhotoButton disabled={!hasAccounts} />
-          <button className="primary" onClick={() => setSheet('tx')} disabled={!hasAccounts}>+ Catat</button>
+          <button className="primary" onClick={() => { setKind('out'); setSheet('tx'); }} disabled={!hasAccounts}>+ Catat</button>
         </div>
       </div>
 
       <Sheet open={sheet === 'cap'} onClose={close} label="Batas bulanan">
         {sheet === 'cap' && <CapForm ym={ym} initial={cap ?? props.lastCap} hasCap={cap !== null} onDone={close} />}
       </Sheet>
-      <Sheet open={sheet === 'tx'} onClose={close} label="Catat pengeluaran">
+      <Sheet open={sheet === 'tx'} onClose={close} label={kind === 'in' ? 'Catat pemasukan' : 'Catat pengeluaran'}>
         {sheet === 'tx' && (
-          <TxForm row={null} accounts={accounts.filter((a) => !a.archived_at)} categories={categories.filter((c) => !c.archived_at)} onDone={close} />
+          <>
+            {incomeTargets.length > 0 && (
+              <div className="seg" role="group" aria-label="Jenis catatan">
+                <button type="button" aria-pressed={kind === 'out'} onClick={() => setKind('out')}>Pengeluaran</button>
+                <button type="button" aria-pressed={kind === 'in'} onClick={() => setKind('in')}>Pemasukan</button>
+              </div>
+            )}
+            {kind === 'in' ? (
+              <>
+                <div className="sheet-head">
+                  <h2 className="sheet-title">Catat pemasukan</h2>
+                  <button type="button" className="textbtn pad" onClick={close}>Batal</button>
+                </div>
+                <IncomeForm row={null} accounts={incomeTargets} onDone={close} />
+              </>
+            ) : (
+              <TxForm row={null} accounts={accounts.filter((a) => !a.archived_at)} categories={categories.filter((c) => !c.archived_at)} onDone={close} />
+            )}
+          </>
         )}
       </Sheet>
     </>

@@ -2,7 +2,7 @@
 -- Fixture (household A dan B) dibuat di dalam transaksi ini lalu di-rollback.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(38);
+select plan(41);
 
 -- ------------------------------------------------ fixture
 insert into auth.users (id, email, aud, role)
@@ -30,6 +30,8 @@ begin
     values (lid, 'Dompet ' || h, 'cash', 500000) returning id into acc;
     insert into public.account_adjustments (account_id, delta, note, created_by)
     values (acc, -2000, 'koreksi', uid);
+    insert into public.incomes (ledger_id, amount, account_id, source, created_by)
+    values (lid, 1000000, acc, 'Gaji', uid);
 
     insert into public.receipts (ledger_id, storage_path, status, parsed_total, created_by)
     values (lid, lid || '/r.jpg', 'parsed', 25000, uid) returning id into rid;
@@ -60,7 +62,7 @@ end $$;
 select tables_are('public', array[
   'households', 'profiles', 'ledgers', 'accounts', 'categories', 'receipts',
   'receipt_items', 'transactions', 'account_adjustments', 'bills',
-  'bill_payments', 'budget_caps', 'ai_providers', 'ai_credentials'
+  'bill_payments', 'budget_caps', 'ai_providers', 'ai_credentials', 'incomes'
 ]);
 select is((select count(*) from pg_tables where schemaname = 'public' and not rowsecurity),
           0::bigint, 'RLS aktif di semua tabel public');
@@ -88,6 +90,7 @@ select is((select count(*) from receipts),            0::bigint, 'anon: receipts
 select is((select count(*) from receipt_items),       0::bigint, 'anon: receipt_items');
 select is((select count(*) from transactions),        0::bigint, 'anon: transactions');
 select is((select count(*) from account_adjustments), 0::bigint, 'anon: account_adjustments');
+select is((select count(*) from incomes),             0::bigint, 'anon: incomes');
 select is((select count(*) from bills),               0::bigint, 'anon: bills');
 select is((select count(*) from bill_payments),       0::bigint, 'anon: bill_payments');
 select is((select count(*) from budget_caps),         0::bigint, 'anon: budget_caps');
@@ -106,6 +109,7 @@ select is((select count(*) from ledgers),             1::bigint, 'A: ledgers');
 select is((select count(*) from categories),          9::bigint, 'A: 9 kategori seed');
 select is((select count(*) from accounts),            1::bigint, 'A: accounts');
 select is((select count(*) from account_adjustments), 1::bigint, 'A: account_adjustments');
+select is((select count(*) from incomes),             1::bigint, 'A: incomes');
 select is((select count(*) from receipts),            1::bigint, 'A: receipts');
 select is((select count(*) from receipt_items),       1::bigint, 'A: receipt_items');
 select is((select count(*) from transactions),        2::bigint, 'A: transactions');
@@ -127,6 +131,11 @@ select throws_ok(format(
     values (%L, 1000, %L, %L)$$,
   current_setting('t.la'), current_setting('t.acc_b'), current_setting('t.cat_a')),
   '23503', null, 'A tidak bisa memakai akun milik B');
+
+select throws_ok(format(
+  $$insert into incomes (ledger_id, amount, account_id, source) values (%L, 1000, %L, 'x')$$,
+  current_setting('t.lb'), current_setting('t.acc_b')),
+  '42501', null, 'A tidak bisa mencatat pemasukan ke ledger B');
 
 select throws_ok(format(
   $$insert into storage.objects (bucket_id, name) values ('receipts', %L)$$,

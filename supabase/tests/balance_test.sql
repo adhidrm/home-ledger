@@ -1,7 +1,7 @@
 -- Saldo akun = opening + Σ adjustment + Σ delta(tx). Smoke test §9 no. 7.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(6);
+select plan(9);
 
 insert into auth.users (id, email, aud, role) values
   ('00000000-0000-0000-0000-0000000000e1', 'e1@test.local', 'authenticated', 'authenticated'),
@@ -31,12 +31,21 @@ select is((select opening_balance from accounts where name = 'Dompet'), 500000::
   'penyesuaian tidak menimpa saldo awal');
 select throws_ok($$insert into account_adjustments (account_id, delta, note)
   values ('20000000-0000-0000-0000-000000000001', 1000, '  ')$$, '23514', null, 'penyesuaian wajib ada alasan');
+
+insert into incomes (ledger_id, amount, account_id, source)
+  values (current_setting('t.l')::uuid, 1000000, '20000000-0000-0000-0000-000000000001', 'Gaji');
+select is((select balance from account_balances where name = 'Dompet'), 1163000::numeric,
+  'pemasukan menambah saldo: 163.000 + 1.000.000 = 1.163.000');
+select throws_ok(format($$insert into incomes (ledger_id, amount, account_id, source)
+  values (%L, 1000, '20000000-0000-0000-0000-000000000001', ' ')$$, current_setting('t.l')),
+  '23514', null, 'pemasukan wajib ada sumber');
 reset role;
 
 -- Household lain tidak melihat saldo E; anon ditolak
 set local role authenticated;
 select set_config('request.jwt.claims', '{"sub":"00000000-0000-0000-0000-0000000000f1","role":"authenticated"}', true);
 select is((select count(*) from account_balances), 0::bigint, 'F tidak melihat saldo E');
+select is((select count(*) from incomes), 0::bigint, 'F tidak melihat pemasukan E');
 reset role;
 set local role anon;
 select throws_ok('select * from account_balances', '42501', null, 'anon ditolak');
