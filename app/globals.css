@@ -1,6 +1,6 @@
 /* Hallmark · app shell, bukan landing page · design/*.dc.html: kertas buku kas, garis tipis, satu aksen bata
    Theme: paper/ink/rule/brick, all tokenised · nav: tabs row · footer: none (app) · job: book a household ledger
-   Waived 24b ×6: hairline rules need optical padding off the 4px scale (field, note, chip, item-sum, cat, track2)
+   Waived 24b ×4: hairline rules need optical padding off the 4px scale (field, note, chip, item-sum)
    Waived 63: the ← → month pager is one icon-only control carrying its own aria-label; no suffix is glued
    Waived 78: app UI, section heads are inline labels under a 32px screen title, not landing-page h2s */
 :root {
@@ -15,6 +15,14 @@
   /* disabled needs three channels: fill, ink, cursor. */
   --off-fill: #e6e2d8;
   --off-ink: #5f5d54;
+  /* Donat kategori: bata untuk irisan terbesar, sisanya tone tanah yang redup di atas kertas. */
+  --chart-1: var(--accent);
+  --chart-2: #2f5d62;
+  --chart-3: #a87620;
+  --chart-4: #6f7d4a;
+  --chart-5: #5b7394;
+  --chart-6: #8a5a6e;
+  --chart-rest: #8f897a;
   --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   /* Tipe satu langkah di atas label, di bawah judul layar. */
   --text-section: 19px;
@@ -161,10 +169,16 @@ a.row { text-decoration: none; }
 .capstatus { margin: 4px 0 0; font-size: 13px; line-height: 18px; text-align: right; color: var(--ink-muted); }
 .capstatus.near { color: var(--ink); font-weight: 500; }
 .capstatus.over { color: var(--accent); font-weight: 500; }
-.cat { padding: 10px 16px 12px; border-bottom: 1px solid var(--rule); min-height: 56px; }
-.cat-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.track2 { height: 2px; background: var(--rule); margin-top: 10px; position: relative; overflow: hidden; }
-.fill2 { position: absolute; inset: 0; background: var(--ink); transform-origin: left center; }
+.donut { position: relative; width: 200px; margin: 20px auto 16px; }
+.donut svg { display: block; width: 100%; transform: rotate(-90deg); }
+.donut-mid { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.donut-total { font-size: 16px; font-weight: 600; line-height: 20px; font-variant-numeric: tabular-nums; }
+.legend { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
+.legend li { display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 16px; border-bottom: 1px solid var(--rule); }
+.legend .t16 { flex: 0 1 auto; min-width: 0; }
+.legend .meta { flex: 0 0 auto; white-space: nowrap; }
+.legend .amt { margin-left: auto; }
+.swatch { width: 10px; height: 10px; flex: 0 0 auto; }
 
 /* Tahap 8: ekspor. */
 .block { padding: 16px; border-bottom: 1px solid var(--rule); display: flex; flex-direction: column; gap: 8px; }

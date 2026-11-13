@@ -20,11 +20,11 @@ export function Dashboard(props: {
   owed: number;
   owedCount: number;
   balances: Balance[];
-  topCats: { name: string; amount: number }[];
+  cats: { name: string; amount: number; rest: boolean }[];
   accounts: Named[];
   categories: Named[];
 }) {
-  const { ym, current, failed, spent, cap, owed, owedCount, balances, topCats, accounts, categories } = props;
+  const { ym, current, failed, spent, cap, owed, owedCount, balances, cats, accounts, categories } = props;
   const [sheet, setSheet] = useState<'cap' | 'tx' | null>(null);
   const [allAcc, setAllAcc] = useState(false);
   const close = () => setSheet(null);
@@ -35,7 +35,14 @@ export function Dashboard(props: {
   // Spec: < 70% aman, 70–99% mendekati, >= 100% lewat. Palet kertas: tinta, lalu bata saat lewat.
   const pct = cap ? spent / cap : 0;
   const level = !cap ? '' : pct >= 1 ? 'over' : pct >= 0.7 ? 'near' : '';
-  const maxCat = topCats[0]?.amount ?? 1;
+  // Tiap irisan: persen dari total dan titik mulainya di keliling donat (pathLength 100).
+  let start = 0;
+  const slices = cats.map((c, i) => {
+    const share = (c.amount / spent) * 100;
+    const s = { ...c, share, start, color: c.rest ? 'var(--chart-rest)' : `var(--chart-${i + 1})` };
+    start += share;
+    return s;
+  });
 
   if (failed)
     return <p className="note err">Ringkasan gagal dimuat. <a href={href(ym)}>Coba lagi</a></p>;
@@ -108,16 +115,35 @@ export function Dashboard(props: {
         </>
       )}
 
-      <h2 className="section">5 kategori terbesar</h2>
-      {topCats.length === 0 ? (
-        <p className="note">Belum ada pengeluaran di {ymLabel(ym)}.</p>
+      <h2 className="section">Pengeluaran per kategori</h2>
+      {slices.length === 0 ? (
+        <p className="note">Belum ada pengeluaran di {ymLabel(ym)}. Catat satu, pembagiannya muncul di sini.</p>
       ) : (
-        topCats.map((c) => (
-          <div className="cat" key={c.name}>
-            <div className="cat-line"><span className="t16">{c.name}</span><span className="amt">{rp(c.amount)}</span></div>
-            <div className="track2"><div className="fill2" style={{ transform: `scaleX(${c.amount / maxCat})` }} /></div>
+        <>
+          <div className="donut">
+            <svg viewBox="0 0 100 100" role="img" aria-label={`Pembagian pengeluaran ${ymLabel(ym)} per kategori`}>
+              {slices.map((s) => (
+                // Celah 0,8 antar irisan: warna bertetangga tidak perlu saling kontras untuk terbaca terpisah.
+                <circle key={s.name} cx="50" cy="50" r="41" pathLength={100} fill="none" stroke={s.color} strokeWidth="14"
+                  strokeDasharray={slices.length > 1 ? `${Math.max(s.share - 0.8, 0.4)} 100` : undefined} strokeDashoffset={-s.start} />
+              ))}
+            </svg>
+            <div className="donut-mid">
+              <span className="meta">Total</span>
+              <span className="donut-total">{rp(spent)}</span>
+            </div>
           </div>
-        ))
+          <ul className="legend">
+            {slices.map((s) => (
+              <li key={s.name}>
+                <span className="swatch" style={{ background: s.color }} aria-hidden="true" />
+                <span className="t16">{s.name}</span>
+                <span className="meta">{s.share < 1 ? '<1' : Math.round(s.share)}%</span>
+                <span className="amt">{rp(s.amount)}</span>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
 
       <div className="spacer" />
