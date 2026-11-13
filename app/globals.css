@@ -164,5 +164,4 @@ a.row { text-decoration: none; }
 .month { display: flex; align-items: center; }
 .file { padding: 8px 16px; border-bottom: 1px solid var(--rule); font-size: 12px; line-height: 16px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 a.ghost { text-decoration: none; }
-.cam { display: block; width: 100%; max-height: 60dvh; background: var(--paper-sunk); object-fit: contain; }
-.cam-msg { padding: 16px; }
+@media not (pointer: coarse) { .cam-btn { display: none; } }
