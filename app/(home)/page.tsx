@@ -24,13 +24,15 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ m
   const rows = tx.data ?? [];
   const spent = rows.reduce((s, r) => s + r.amount, 0);
 
-  // Top 5 kategori bulan ini.
+  // Irisan donat: sampai 6 kategori tampil semua; lebih dari itu, 5 terbesar + "Lainnya".
   const byCat = new Map<string, number>();
   for (const r of rows) byCat.set(r.category_id, (byCat.get(r.category_id) ?? 0) + r.amount);
-  const topCats = [...byCat]
+  const sorted = [...byCat]
     .sort((a, b) => b[1] - a[1])
-    .slice(0, 5)
-    .map(([id, amount]) => ({ name: categories.data?.find((c) => c.id === id)?.name ?? 'Tanpa kategori', amount }));
+    .map(([id, amount]) => ({ name: categories.data?.find((c) => c.id === id)?.name ?? 'Tanpa kategori', amount, rest: false }));
+  const cats = sorted.length > 6
+    ? [...sorted.slice(0, 5), { name: 'Lainnya', amount: sorted.slice(5).reduce((s, c) => s + c.amount, 0), rest: true }]
+    : sorted;
 
   // Terutang = tagihan aktif yang belum lunas di bulan ini (tidak mengurangi pengeluaran).
   const paidIds = new Set((paid.data ?? []).map((p) => p.bill_id));
@@ -50,7 +52,7 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ m
         owed={unpaid.reduce((s, b) => s + Number(b.nominal_expected), 0)}
         owedCount={unpaid.length}
         balances={(balances.data ?? []).map((a) => ({ ...a, balance: Number(a.balance) }))}
-        topCats={topCats}
+        cats={cats}
         accounts={accounts.data ?? []}
         categories={categories.data ?? []}
       />
