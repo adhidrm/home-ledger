@@ -4,12 +4,13 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { MoneyInput } from '@/components/money-input';
 import { rp, todayJkt } from '@/lib/format';
+import { cleanDrafts, draftSum, itemsOff, toDrafts, type Item } from '@/lib/receipt-items';
 import type { Receipt } from '@/supabase/functions/_shared/ocr';
 import { saveTx } from '../../pengeluaran/tx-actions';
-import { scanReceipt } from '../actions';
+import { saveReceiptItems, scanReceipt } from '../actions';
+import { ItemEditor, RecordedItems } from './items';
 
 type Named = { id: string; name: string };
-type Item = { id: string; name: string; qty: number; unit_price: number | null; line_total: number };
 
 export function ReceiptReview(props: {
   receipt: { id: string; status: string; raw: string | null; total: number | null };
@@ -18,9 +19,10 @@ export function ReceiptReview(props: {
   items: Item[];
   accounts: Named[];
   categories: Named[];
-  recorded: boolean;
+  recordedAmount: number | null; // jumlah transaksi kalau struk sudah dicatat
 }) {
-  const { receipt, photoUrl, recorded } = props;
+  const { receipt, photoUrl, recordedAmount } = props;
+  const recorded = recordedAmount !== null;
   const router = useRouter();
   const [scan, setScan] = useState<'idle' | 'running' | 'not_configured' | 'error'>(
     receipt.status === 'pending' && !recorded ? 'running' : 'idle',
@@ -56,7 +58,8 @@ export function ReceiptReview(props: {
     return (
       <>
         {photo}
-        <p className="note">Struk ini sudah dicatat sebagai pengeluaran. <a href="/">Ke daftar pengeluaran</a></p>
+        <p className="note">Struk ini sudah dicatat sebagai pengeluaran {rp(recordedAmount)}. <a href="/pengeluaran">Ke daftar pengeluaran</a></p>
+        <RecordedItems receiptId={receipt.id} items={props.items} total={recordedAmount} />
       </>
     );
 
@@ -105,6 +108,8 @@ function ReviewForm({ receipt, parsed, items, accounts, categories }: Parameters
   const [accountId, setAccountId] = useState('');
   const [categoryId, setCategoryId] = useState(categories.find((c) => c.name.toLowerCase() === guess)?.id ?? '');
   const [itemsOpen, setItemsOpen] = useState(false);
+  const [drafts, setDrafts] = useState(() => toDrafts(items));
+  const [itemErrors, setItemErrors] = useState<Record<string, string>>({});
   const [similar, setSimilar] = useState(0);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
@@ -116,8 +121,8 @@ function ReviewForm({ receipt, parsed, items, accounts, categories }: Parameters
   }, [accounts]);
   useEffect(() => setSimilar(0), [amount, date, merchant]);
 
-  const mismatch = receipt.status === 'needs_check';
-  const itemsSum = items.reduce((s, i) => s + i.line_total, 0);
+  const count = cleanDrafts(drafts).items.length;
+  const mismatch = itemsOff(draftSum(drafts), amount, count);
   const ready = amount > 0 && accountId && categoryId && date;
 
   if (accounts.length === 0)
@@ -129,8 +134,16 @@ function ReviewForm({ receipt, parsed, items, accounts, categories }: Parameters
       style={{ marginTop: 16, borderTop: mismatch ? undefined : '1px solid var(--rule)' }}
       onSubmit={async (e) => {
         e.preventDefault();
+        const c = cleanDrafts(drafts);
+        setItemErrors(c.errors);
+        if (Object.keys(c.errors).length) return setItemsOpen(true);
         setPending(true);
         setError('');
+        const saved = await saveReceiptItems(receipt.id, c.items, amount);
+        if (saved.error) {
+          setPending(false);
+          return setError(saved.error);
+        }
         const r = await saveTx({ amount, date, accountId, categoryId, merchant, note: '', receiptId: receipt.id, force: similar > 0 });
         setPending(false);
         if (r.similar) return setSimilar(r.similar);
@@ -142,7 +155,7 @@ function ReviewForm({ receipt, parsed, items, accounts, categories }: Parameters
       <label className="field">
         <span className="flabel">Total</span>
         <MoneyInput value={amount} onChange={setAmount} big />
-        {mismatch && <span className="warnline">Jumlah item tidak cocok dengan total struk. Total struk dipakai.</span>}
+        {mismatch && <span className="warnline">Jumlah item tidak cocok dengan total. Yang dicatat tetap total ini.</span>}
       </label>
       <label className="field">
         <span className="flabel">Merchant</span>
@@ -172,28 +185,11 @@ function ReviewForm({ receipt, parsed, items, accounts, categories }: Parameters
         </span>
       </label>
 
-      {receipt.status !== 'failed' && (
-        <>
-          <button type="button" className="disclosure" aria-expanded={itemsOpen} onClick={() => setItemsOpen(!itemsOpen)}>
-            <span>Item ({items.length}){mismatch && <span className="badge"> · perlu dicek</span>}</span>
-            <span className="disc-hint">{itemsOpen ? 'Sembunyikan' : 'Tampilkan'}</span>
-          </button>
-          {itemsOpen &&
-            (items.length === 0 ? (
-              <p className="note">Tidak ada item yang terbaca dari struk ini.</p>
-            ) : (
-              <>
-                {items.map((it) => (
-                  <div className="item" key={it.id}>
-                    <span className="item-name">{it.name}</span>
-                    <span className="item-qty">{it.qty} x {rp(it.unit_price ?? 0)}</span>
-                  </div>
-                ))}
-                <div className="item-sum"><span>Jumlah item</span><span>{rp(itemsSum)}</span></div>
-              </>
-            ))}
-        </>
-      )}
+      <button type="button" className="disclosure" aria-expanded={itemsOpen} onClick={() => setItemsOpen(!itemsOpen)}>
+        <span>Item ({count}){mismatch && <span className="badge"> · perlu dicek</span>}</span>
+        <span className="disc-hint">{itemsOpen ? 'Sembunyikan' : 'Tampilkan'}</span>
+      </button>
+      {itemsOpen && <ItemEditor drafts={drafts} onChange={setDrafts} errors={itemErrors} total={amount} />}
 
       <div className="spacer" />
       <div className="bottom">
