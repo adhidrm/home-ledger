@@ -159,9 +159,17 @@ a.row { text-decoration: none; }
 
 /* Tahap 7: ringkasan. Dari design/Main. */
 .dash-month { display: flex; align-items: center; justify-content: center; height: 48px; border-bottom: 1px solid var(--rule); }
-.strip { background: var(--paper-sunk); border-bottom: 1px solid var(--rule); padding: 8px 16px 16px; }
-.strip-head { display: flex; justify-content: space-between; align-items: center; min-height: 44px; }
-.figure { font-size: 40px; font-weight: 600; line-height: 48px; margin: 0 0 8px; font-variant-numeric: tabular-nums; }
+.strip { background: var(--paper-sunk); border-bottom: 1px solid var(--rule); padding: 16px; }
+.flow { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.flow-col { display: flex; flex-direction: column; min-width: 0; text-decoration: none; }
+.flow-label { font-size: 13px; font-weight: 500; line-height: 18px; color: var(--ink-muted); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--rule); }
+.flow-fig { font-size: 22px; font-weight: 600; line-height: 30px; margin-bottom: 8px; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.flow-col .track { display: block; flex: none; }
+.flow-col:active { background: var(--paper); }
+.capblock { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--rule); }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border-bottom: 1px solid var(--rule); }
+.seg button { min-height: 48px; font-size: 15px; text-align: center; color: var(--ink-muted); border-bottom: 2px solid transparent; }
+.seg button[aria-pressed='true'] { color: var(--ink); font-weight: 600; border-bottom-color: var(--ink); }
 .capbar { display: flex; align-items: center; gap: 12px; }
 .track { flex: 1 1 auto; min-width: 0; height: 4px; background: var(--rule); position: relative; overflow: hidden; }
 .fill { position: absolute; inset: 0; background: var(--ink); transform-origin: left center; }

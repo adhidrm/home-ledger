@@ -13,7 +13,7 @@ if (!url) {
 
 const tables = ['households', 'profiles', 'ledgers', 'accounts', 'categories', 'receipts',
   'receipt_items', 'transactions', 'account_adjustments', 'bills', 'bill_payments',
-  'budget_caps', 'ai_providers', 'ai_credentials'];
+  'budget_caps', 'ai_providers', 'ai_credentials', 'incomes'];
 
 const get = (path, key) => fetch(`${url}${path}`, { headers: { apikey: key, Authorization: `Bearer ${key}` } });
 

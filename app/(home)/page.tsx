@@ -9,18 +9,19 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ m
   const ym = /^\d{4}-(0[1-9]|1[0-2])$/.test(sp.m ?? '') && sp.m! <= current ? sp.m! : current;
   const { supabase } = await requireLedger();
 
-  const [tx, cap, lastCap, bills, paid, balances, accounts, categories] = await Promise.all([
+  const [tx, inc, cap, lastCap, bills, paid, balances, accounts, categories] = await Promise.all([
     supabase.from('transactions').select('amount, category_id').gte('date', `${ym}-01`).lt('date', nextMonthStart(ym)),
+    supabase.from('incomes').select('amount').gte('date', `${ym}-01`).lt('date', nextMonthStart(ym)),
     supabase.from('budget_caps').select('amount').eq('period', ym).maybeSingle(),
     supabase.from('budget_caps').select('amount').lt('period', ym).order('period', { ascending: false }).limit(1).maybeSingle(),
     supabase.from('bills').select('id, nominal_expected').eq('active', true),
     supabase.from('bill_payments').select('bill_id').eq('period', ym).eq('status', 'paid'),
     supabase.from('account_balances').select('id, name, type, balance').is('archived_at', null).order('balance', { ascending: false }),
-    supabase.from('accounts').select('id, name, archived_at').order('name'),
+    supabase.from('accounts').select('id, name, type, archived_at').order('name'),
     supabase.from('categories').select('id, name, archived_at').order('sort'),
   ]);
 
-  const failed = [tx, cap, bills, paid, balances, accounts, categories].some((r) => r.error);
+  const failed = [tx, inc, cap, bills, paid, balances, accounts, categories].some((r) => r.error);
   const rows = tx.data ?? [];
   const spent = rows.reduce((s, r) => s + r.amount, 0);
 
@@ -47,6 +48,8 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ m
         current={current}
         failed={failed}
         spent={spent}
+        income={(inc.data ?? []).reduce((s, r) => s + r.amount, 0)}
+        incomeTargets={(accounts.data ?? []).filter((a) => !a.archived_at && a.type !== 'credit_card')}
         cap={cap.data ? Number(cap.data.amount) : null}
         lastCap={lastCap.data ? Number(lastCap.data.amount) : 0}
         owed={unpaid.reduce((s, b) => s + Number(b.nominal_expected), 0)}
