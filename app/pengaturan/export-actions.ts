@@ -24,7 +24,7 @@ export async function exportData(): Promise<{ files?: ExportFile[]; error?: stri
     supabase.from('accounts').select('*').order('name'),
     supabase.from('account_balances').select('id, balance'),
     supabase.from('categories').select('*').order('sort'),
-    supabase.from('account_adjustments').select('*').order('created_at'),
+    supabase.from('account_adjustments').select('*').order('date'),
     supabase.from('bills').select('*').order('name'),
     supabase.from('bill_payments').select('*').order('period'),
     supabase.from('budget_caps').select('*').order('period'),
