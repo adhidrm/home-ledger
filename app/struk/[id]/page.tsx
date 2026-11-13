@@ -19,7 +19,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
     supabase.from('receipt_items').select('id, name, qty, unit_price, line_total').eq('receipt_id', id),
     supabase.from('accounts').select('id, name').is('archived_at', null).order('name'),
     supabase.from('categories').select('id, name').is('archived_at', null).order('sort'),
-    supabase.from('transactions').select('id').eq('receipt_id', id).maybeSingle(),
+    supabase.from('transactions').select('amount').eq('receipt_id', id).maybeSingle(),
   ]);
 
   // Prefill dibaca ulang dari jawaban mentah yang tersimpan (skema yang sama dengan Edge Function).
@@ -37,7 +37,7 @@ export default async function ReceiptPage({ params }: { params: Promise<{ id: st
         items={(items.data ?? []).map((i) => ({ ...i, qty: Number(i.qty) }))}
         accounts={accounts.data ?? []}
         categories={categories.data ?? []}
-        recorded={Boolean(tx.data)}
+        recordedAmount={tx.data ? Number(tx.data.amount) : null}
       />
     </>
   );
