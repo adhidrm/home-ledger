@@ -5,6 +5,8 @@ import { useEffect, useState } from 'react';
 import { MoneyInput } from '@/components/money-input';
 import { Sheet } from '@/components/sheet';
 import { dayLabel, rp, shiftYm, todayJkt, ymLabel } from '@/lib/format';
+import { autoAmount, blankDraft, cleanDrafts, draftSum, toDrafts, type Draft, type Item } from '@/lib/receipt-items';
+import { ItemEditor } from '../struk/[id]/items';
 import { PhotoButton } from '../struk/photo-button';
 import { deleteTx, saveTx } from './tx-actions';
 
@@ -20,6 +22,7 @@ type Row = {
   source: string;
   receipt_id: string | null;
   needsCheck: boolean;
+  items: Item[];
 };
 type Filters = { akun: string; kat: string; q: string };
 
@@ -207,6 +210,15 @@ export function TxForm({ row, accounts, categories, onDone }: {
   const [similar, setSimilar] = useState(0);
   const [error, setError] = useState('');
   const [pending, setPending] = useState(false);
+  const [drafts, setDrafts] = useState<Draft[]>(() => toDrafts(row?.items ?? []));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Item hanya di pengeluaran manual. Item struk diubah di halaman struk.
+  const canItems = !row || row.source === 'manual';
+  const changeDrafts = (next: Draft[]) => {
+    setAmount(autoAmount(amount, draftSum(drafts), draftSum(next)));
+    setDrafts(next);
+  };
 
   // Akun terakhir dipakai di perangkat ini, supaya catat cepat (< 15 detik).
   useEffect(() => {
@@ -225,9 +237,15 @@ export function TxForm({ row, accounts, categories, onDone }: {
     <form
       onSubmit={async (e) => {
         e.preventDefault();
+        const c = cleanDrafts(drafts);
+        setErrors(c.errors);
+        if (Object.keys(c.errors).length) return;
         setPending(true);
         setError('');
-        const r = await saveTx({ id: row?.id, amount, date, accountId, categoryId, merchant, note, force: similar > 0 });
+        const r = await saveTx({
+          id: row?.id, amount, date, accountId, categoryId, merchant, note, force: similar > 0,
+          items: canItems ? c.items : undefined,
+        });
         setPending(false);
         if (r.similar) return setSimilar(r.similar);
         if (r.error) return setError(r.error);
@@ -274,6 +292,14 @@ export function TxForm({ row, accounts, categories, onDone }: {
         <span className="flabel">Catatan</span>
         <input className="input" value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="Opsional" autoComplete="off" />
       </label>
+      {!canItems ? null : drafts.length === 0 ? (
+        <button type="button" className="row actbtn" onClick={() => setDrafts([blankDraft()])}>Tambah item</button>
+      ) : (
+        <>
+          <h3 className="section">Item</h3>
+          <ItemEditor drafts={drafts} onChange={changeDrafts} errors={errors} total={amount} />
+        </>
+      )}
       <div className="sheet-foot">
         {similar > 0 && (
           <p className="warnline" role="status">

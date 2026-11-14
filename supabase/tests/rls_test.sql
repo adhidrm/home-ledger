@@ -2,7 +2,7 @@
 -- Fixture (household A dan B) dibuat di dalam transaksi ini lalu di-rollback.
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(41);
+select plan(43);
 
 -- ------------------------------------------------ fixture
 insert into auth.users (id, email, aud, role)
@@ -45,6 +45,9 @@ begin
     values (lid, 'Listrik', cat, acc, 300000, 5) returning id into bid;
     insert into public.transactions (ledger_id, amount, account_id, category_id, merchant, source, created_by)
     values (lid, 310000, acc, cat, 'Listrik', 'bill', uid) returning id into tid;
+    -- item yang menempel langsung ke pengeluaran, tanpa struk
+    insert into public.receipt_items (transaction_id, name, qty, unit_price, line_total)
+    values (tid, 'Token', 1, 310000, 310000);
     insert into public.bill_payments (bill_id, period, status, amount, transaction_id, paid_at, paid_by)
     values (bid, to_char(now(), 'YYYY-MM'), 'paid', 310000, tid, now(), uid) returning id into bpid;
     update public.transactions set bill_payment_id = bpid where id = tid;
@@ -74,6 +77,8 @@ select set_config('t.la', (select id::text from ledgers
   where household_id = '10000000-0000-0000-0000-00000000000a'), true);
 select set_config('t.acc_b', (select a.id::text from accounts a
   where a.ledger_id = current_setting('t.lb')::uuid), true);
+select set_config('t.tx_b', (select t.id::text from transactions t
+  where t.ledger_id = current_setting('t.lb')::uuid limit 1), true);
 select set_config('t.cat_a', (select c.id::text from categories c
   where c.ledger_id = current_setting('t.la')::uuid limit 1), true);
 
@@ -111,7 +116,7 @@ select is((select count(*) from accounts),            1::bigint, 'A: accounts');
 select is((select count(*) from account_adjustments), 1::bigint, 'A: account_adjustments');
 select is((select count(*) from incomes),             1::bigint, 'A: incomes');
 select is((select count(*) from receipts),            1::bigint, 'A: receipts');
-select is((select count(*) from receipt_items),       1::bigint, 'A: receipt_items');
+select is((select count(*) from receipt_items),       2::bigint, 'A: receipt_items (struk + pengeluaran)');
 select is((select count(*) from transactions),        2::bigint, 'A: transactions');
 select is((select count(*) from bills),               1::bigint, 'A: bills');
 select is((select count(*) from bill_payments),       1::bigint, 'A: bill_payments');
@@ -131,6 +136,11 @@ select throws_ok(format(
     values (%L, 1000, %L, %L)$$,
   current_setting('t.la'), current_setting('t.acc_b'), current_setting('t.cat_a')),
   '23503', null, 'A tidak bisa memakai akun milik B');
+
+select throws_ok(format(
+  $$insert into receipt_items (transaction_id, name, line_total) values (%L, 'x', 1000)$$,
+  current_setting('t.tx_b')),
+  '42501', null, 'A tidak bisa menambah item ke pengeluaran B');
 
 select throws_ok(format(
   $$insert into incomes (ledger_id, amount, account_id, source) values (%L, 1000, %L, 'x')$$,
@@ -159,6 +169,9 @@ select is((select name from households where id = '10000000-0000-0000-0000-00000
 
 set local role service_role;
 select is((select count(*) from ai_credentials), 2::bigint, 'service_role bisa baca ai_credentials');
+-- lewat service_role supaya yang menolak adalah constraint, bukan RLS
+select throws_ok($$insert into receipt_items (name, line_total) values ('x', 1000)$$,
+  '23514', null, 'item wajib punya tepat satu induk');
 
 select * from finish();
 rollback;

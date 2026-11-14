@@ -1,7 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
-import { itemsOff, lineTotal, MAX_ITEMS, type ItemInput } from '@/lib/receipt-items';
+import { itemRows, itemsOff, MAX_ITEMS, replaceItems, type ItemInput } from '@/lib/receipt-items';
 import { requireLedger } from '@/lib/session';
 import { createClient } from '@/lib/supabase/server';
 
@@ -35,22 +35,10 @@ export async function scanReceipt(id: string): Promise<{ status?: string; error?
 // Dipakai layar review (sebelum dicatat) dan "Ubah item" (sesudah dicatat). `total` = angka pembanding untuk status.
 export async function saveReceiptItems(receiptId: string, items: ItemInput[], total: number): Promise<{ error?: string }> {
   if (items.length > MAX_ITEMS) return { error: 'Terlalu banyak item.' };
-  const rows = [];
-  for (const i of items) {
-    const name = String(i.name).trim().slice(0, 120);
-    const line_total = lineTotal(i.qty, i.unit_price);
-    if (!name || !(i.qty > 0) || !Number.isSafeInteger(i.unit_price) || i.unit_price < 0 || !Number.isSafeInteger(line_total))
-      return { error: 'Periksa lagi isi item.' };
-    rows.push({ receipt_id: receiptId, name, qty: i.qty, unit_price: i.unit_price, line_total });
-  }
-  const fail = { error: 'Item gagal disimpan. Coba lagi.' };
+  const rows = itemRows(items);
+  if (!rows) return { error: 'Periksa lagi isi item.' };
   const { supabase } = await requireLedger();
-  const old = await supabase.from('receipt_items').select('id').eq('receipt_id', receiptId);
-  if (old.error) return fail;
-  // ponytail: bukan satu transaksi. Sisip dulu baru hapus, jadi gagal di tengah tidak menghilangkan item lama
-  // (paling buruk item dobel). Pindah ke RPC kalau dobel itu pernah terjadi.
-  if (rows.length && (await supabase.from('receipt_items').insert(rows)).error) return fail;
-  if (old.data.length && (await supabase.from('receipt_items').delete().in('id', old.data.map((o) => o.id))).error) return fail;
+  if (!(await replaceItems(supabase, { receipt_id: receiptId }, rows))) return { error: 'Item gagal disimpan. Coba lagi.' };
 
   const sum = rows.reduce((s, r) => s + r.line_total, 0);
   await supabase
