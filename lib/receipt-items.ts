@@ -1,4 +1,5 @@
-// Item struk: bentuk draf di form, validasi, dan aturan "perlu dicek".
+// Item struk dan item pengeluaran manual: bentuk draf di form, validasi, simpan, dan aturan "perlu dicek".
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 export type Item = { id: string; name: string; qty: number; unit_price: number | null; line_total: number };
 export type ItemInput = { name: string; qty: number; unit_price: number };
@@ -39,3 +40,41 @@ export function cleanDrafts(drafts: Draft[]): { items: ItemInput[]; errors: Reco
 
 export const draftSum = (drafts: Draft[]) =>
   cleanDrafts(drafts).items.reduce((s, i) => s + lineTotal(i.qty, i.unit_price), 0);
+
+/**
+ * Nominal pengeluaran manual mengikuti jumlah item selama masih kosong atau masih sama dengan jumlah item sebelumnya.
+ * Jumlah item 0 (semua item dihapus) tidak mengosongkan nominal.
+ */
+export const autoAmount = (amount: number, prevSum: number, nextSum: number) =>
+  nextSum > 0 && (amount === 0 || amount === prevSum) ? nextSum : amount;
+
+export type ItemRow = ItemInput & { line_total: number };
+
+/** Validasi sisi server. Satu item tidak sah -> null, tidak ada yang disimpan. */
+export function itemRows(items: ItemInput[]): ItemRow[] | null {
+  const rows: ItemRow[] = [];
+  for (const i of items) {
+    const name = String(i.name).trim().slice(0, 120);
+    const line_total = lineTotal(i.qty, i.unit_price);
+    if (!name || !(i.qty > 0) || !Number.isSafeInteger(i.unit_price) || i.unit_price < 0 || !Number.isSafeInteger(line_total))
+      return null;
+    rows.push({ name, qty: i.qty, unit_price: i.unit_price, line_total });
+  }
+  return rows;
+}
+
+/** Ganti semua item milik satu struk atau satu pengeluaran manual. false = gagal. */
+export async function replaceItems(
+  supabase: SupabaseClient,
+  parent: { receipt_id: string } | { transaction_id: string },
+  rows: ItemRow[],
+): Promise<boolean> {
+  const [col, id] = Object.entries(parent)[0];
+  const old = await supabase.from('receipt_items').select('id').eq(col, id);
+  if (old.error) return false;
+  // ponytail: bukan satu transaksi. Sisip dulu baru hapus, jadi gagal di tengah tidak menghilangkan item lama
+  // (paling buruk item dobel). Pindah ke RPC kalau dobel itu pernah terjadi.
+  if (rows.length && (await supabase.from('receipt_items').insert(rows.map((r) => ({ ...r, ...parent })))).error) return false;
+  if (old.data.length && (await supabase.from('receipt_items').delete().in('id', old.data.map((o) => o.id))).error) return false;
+  return true;
+}

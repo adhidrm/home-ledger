@@ -15,7 +15,7 @@ export default async function ExpensesPage({
 
   let q = supabase
     .from('transactions')
-    .select('id, date, amount, account_id, category_id, merchant, note, source, receipt_id, receipts(status)')
+    .select('id, date, amount, account_id, category_id, merchant, note, source, receipt_id, receipts(status), receipt_items(id, name, qty, unit_price, line_total)')
     .gte('date', `${ym}-01`)
     .lt('date', nextMonthStart(ym))
     .order('date', { ascending: false })
@@ -37,8 +37,9 @@ export default async function ExpensesPage({
         ym={ym}
         current={current}
         filters={{ akun: sp.akun ?? '', kat: sp.kat ?? '', q: sp.q ?? '' }}
-        rows={(tx.data ?? []).map(({ receipts, ...r }) => ({
+        rows={(tx.data ?? []).map(({ receipts, receipt_items, ...r }) => ({
           ...r,
+          items: receipt_items ?? [],
           // relasi many-to-one: runtime berupa objek, tipe tanpa skema menebak array
           needsCheck: (receipts as unknown as { status: string } | null)?.status === 'needs_check',
         }))}
