@@ -16,6 +16,8 @@ This file is the single source of truth. `CLAUDE.md` only points here.
 | `npm run preview` | build + run the Cloudflare Worker locally |
 | `npm run deploy` | build + deploy to Cloudflare |
 
+`db:push` and `db:test` read `SUPABASE_DB_URL` (session pooler URL) from `.env.local`; see `.env.example`.
+
 Local stack: `npx supabase start` (Postgres 54322, API 54321, Studio 54323).
 
 ## Non-negotiables

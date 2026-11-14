@@ -6,8 +6,8 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "db:push": "supabase db push",
-    "db:test": "supabase test db --remote",
+    "db:push": "node scripts/db.mjs db push",
+    "db:test": "node scripts/db.mjs test db",
     "db:anon-check": "node scripts/anon-check.mjs",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy"
